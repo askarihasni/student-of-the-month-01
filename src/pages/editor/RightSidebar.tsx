@@ -58,7 +58,7 @@ export const RightSidebar: React.FC = () => {
 
   if (isCollapsed) {
     return (
-      <aside className="w-9 bg-[#2C2C2C] border-l border-[#383838] flex flex-col items-center py-2 text-[#7E7E7E] shrink-0 h-[calc(100vh-44px)] select-none z-20">
+      <aside className="w-9 bg-[#2C2C2C] border-l border-[#383838] flex flex-col items-center py-2 text-[#7E7E7E] shrink-0 h-[calc(100vh-48px)] select-none z-20">
         <button
           type="button"
           onClick={() => setIsCollapsed(false)}
@@ -75,7 +75,7 @@ export const RightSidebar: React.FC = () => {
   // If no object is selected, show page / canvas settings
   if (selectedNodes.length === 0) {
     return (
-      <aside className="w-64 bg-[#2C2C2C] border-l border-[#383838] p-3.5 select-none text-[#B3B3B3] text-xs shrink-0 h-[calc(100vh-44px)] overflow-y-auto z-20 space-y-4">
+      <aside className="w-72 bg-[#2C2C2C] border-l border-[#383838] p-4 select-none text-[#B3B3B3] text-xs shrink-0 h-[calc(100vh-48px)] overflow-y-auto z-20 space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-[#383838]">
           <h3 className="font-semibold text-white text-[11px] uppercase tracking-wider">
             Page & Canvas
@@ -189,7 +189,7 @@ export const RightSidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-64 bg-[#2C2C2C] border-l border-[#383838] p-3 select-none text-[#B3B3B3] text-xs shrink-0 h-[calc(100vh-44px)] overflow-y-auto z-20 space-y-3.5">
+    <aside className="w-72 bg-[#2C2C2C] border-l border-[#383838] p-4 select-none text-[#B3B3B3] text-xs shrink-0 h-[calc(100vh-48px)] overflow-y-auto z-20 space-y-4">
       {/* Header with Title and Collapse Button */}
       <div className="flex items-center justify-between pb-2 border-b border-[#383838]">
         <div className="truncate">

@@ -55,21 +55,21 @@ export const LeftSidebar: React.FC = () => {
   const getNodeIcon = (type: NodeType) => {
     switch (type) {
       case 'rectangle':
-        return <Square className="w-3.5 h-3.5 text-[#1ABCFE]" />
+        return <Square className="w-4 h-4 text-[#1ABCFE]" />
       case 'ellipse':
-        return <Circle className="w-3.5 h-3.5 text-[#0ACF83]" />
+        return <Circle className="w-4 h-4 text-[#0ACF83]" />
       case 'line':
-        return <Minus className="w-3.5 h-3.5 text-[#B3B3B3]" />
+        return <Minus className="w-4 h-4 text-[#B3B3B3]" />
       case 'text':
-        return <Type className="w-3.5 h-3.5 text-[#A259FF]" />
+        return <Type className="w-4 h-4 text-[#A259FF]" />
       case 'frame':
-        return <Frame className="w-3.5 h-3.5 text-[#FF7262]" />
+        return <Frame className="w-4 h-4 text-[#FF7262]" />
       case 'path':
-        return <PenTool className="w-3.5 h-3.5 text-[#F24E1E]" />
+        return <PenTool className="w-4 h-4 text-[#F24E1E]" />
       case 'image':
-        return <ImageIcon className="w-3.5 h-3.5 text-[#1ABCFE]" />
+        return <ImageIcon className="w-4 h-4 text-[#1ABCFE]" />
       case 'group':
-        return <Folder className="w-3.5 h-3.5 text-[#F59E0B]" />
+        return <Folder className="w-4 h-4 text-[#F59E0B]" />
     }
   }
 
@@ -96,7 +96,7 @@ export const LeftSidebar: React.FC = () => {
 
   if (isCollapsed) {
     return (
-      <aside className="w-9 bg-[#2C2C2C] border-r border-[#383838] flex flex-col items-center py-2 text-[#7E7E7E] shrink-0 h-[calc(100vh-44px)] select-none z-20">
+      <aside className="w-9 bg-[#2C2C2C] border-r border-[#383838] flex flex-col items-center py-2 text-[#7E7E7E] shrink-0 h-[calc(100vh-48px)] select-none z-20">
         <button
           type="button"
           onClick={() => setIsCollapsed(false)}
@@ -111,7 +111,7 @@ export const LeftSidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-60 bg-[#2C2C2C] border-r border-[#383838] flex flex-col h-[calc(100vh-44px)] select-none text-[#B3B3B3] text-xs shrink-0 z-20 transition-all duration-150">
+    <aside className="w-68 bg-[#2C2C2C] border-r border-[#383838] flex flex-col h-[calc(100vh-48px)] select-none text-[#B3B3B3] text-xs shrink-0 z-20 transition-all duration-150">
       {/* Pages Section */}
       <div className="border-b border-[#383838]">
         <div className="flex items-center justify-between px-3 py-2 text-[#7E7E7E] hover:text-white transition-colors">
@@ -247,20 +247,20 @@ export const LeftSidebar: React.FC = () => {
                   onClick={(e) => selectNode(node.id, e.shiftKey)}
                   onMouseEnter={() => setHoverNodeId(node.id)}
                   onMouseLeave={() => setHoverNodeId(null)}
-                  className={`group flex items-center justify-between px-2 py-1 rounded cursor-pointer transition-colors ${
+                  className={`group flex items-center justify-between px-2.5 py-1 rounded-md cursor-pointer transition-colors ${
                     isSelected
                       ? 'bg-[#0D99FF] text-white font-medium'
                       : 'hover:bg-[#383838] text-[#B3B3B3] hover:text-white'
                   }`}
-                  style={{ height: '28px' }}
+                  style={{ height: '32px' }}
                 >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <span className="shrink-0">{getNodeIcon(node.type)}</span>
 
                     {/* Mini color swatch */}
                     {swatchColor && (
                       <span
-                        className="w-2.5 h-2.5 rounded-sm shrink-0 border border-black/20"
+                        className="w-3 h-3 rounded shrink-0 border border-black/20"
                         style={{ backgroundColor: swatchColor }}
                       />
                     )}
@@ -276,14 +276,14 @@ export const LeftSidebar: React.FC = () => {
                           value={renameValue}
                           onChange={(e) => setRenameValue(e.target.value)}
                           onBlur={(e) => handleRenameSubmit(node.id, e)}
-                          className="w-full bg-[#1E1E1E] border border-white text-white text-[11px] px-1 py-0.5 rounded focus:outline-none"
+                          className="w-full bg-[#1E1E1E] border border-white text-white text-xs px-1.5 py-0.5 rounded focus:outline-none"
                           autoFocus
                         />
                       </form>
                     ) : (
                       <span
                         onDoubleClick={(e) => handleStartRename(node.id, node.name, e)}
-                        className="truncate text-[11px] select-none"
+                        className="truncate text-xs select-none font-medium"
                         title="Double-click to rename"
                       >
                         {node.name}

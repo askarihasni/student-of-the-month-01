@@ -125,23 +125,23 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
   ]
 
   return (
-    <header className="h-11 bg-[#2C2C2C] border-b border-[#383838] flex items-center justify-between px-3 text-[#B3B3B3] select-none z-30 shrink-0">
+    <header className="h-13 bg-[#2C2C2C] border-b border-[#383838] flex items-center justify-between px-4 text-[#B3B3B3] select-none z-30 shrink-0 shadow-sm">
       {/* Left: Application Logo, Back Button & Editable Document Title */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3.5">
         <button
           type="button"
           onClick={closeDocument}
-          className="flex items-center gap-1.5 p-1 rounded hover:bg-[#383838] text-white transition-colors focus:outline-none"
+          className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#383838] text-white transition-colors focus:outline-none"
           title="Back to Files Dashboard"
           aria-label="Back to Files Dashboard"
         >
-          <FigmaLogo size={18} showWordmark={false} />
+          <FigmaLogo size={22} showWordmark={false} />
           <ChevronDown className="w-3.5 h-3.5 text-[#7E7E7E]" />
         </button>
 
-        <div className="w-[1px] h-4 bg-[#383838] hidden sm:block" />
+        <div className="w-[1px] h-5 bg-[#383838] hidden sm:block" />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {isEditingTitle ? (
             <form onSubmit={handleTitleSubmit}>
               <input
@@ -149,7 +149,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
                 value={titleInput}
                 onChange={(e) => setTitleInput(e.target.value)}
                 onBlur={handleTitleSubmit}
-                className="bg-[#1E1E1E] text-xs text-white px-2 py-0.5 rounded border border-[#0D99FF] focus:outline-none font-medium"
+                className="bg-[#1E1E1E] text-sm text-white px-2.5 py-1 rounded border border-[#0D99FF] focus:outline-none font-semibold"
                 autoFocus
               />
             </form>
@@ -160,16 +160,16 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
                 setTitleInput(document?.name || 'Untitled Design')
                 setIsEditingTitle(true)
               }}
-              className="text-xs font-semibold text-white hover:bg-[#383838] px-2 py-1 rounded transition-colors truncate max-w-[140px] sm:max-w-xs flex items-center gap-1.5"
+              className="text-sm font-bold text-white hover:bg-[#383838] px-2.5 py-1 rounded-lg transition-colors truncate max-w-[140px] sm:max-w-xs flex items-center gap-1.5"
               title="Click to rename document"
             >
               <span>{document?.name || 'Untitled Design'}</span>
-              <ChevronDown className="w-3 h-3 text-[#7E7E7E]" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#7E7E7E]" />
             </button>
           )}
 
           {/* Cloud Save status indicator */}
-          <div className="hidden lg:flex items-center gap-1 text-[11px] text-[#7E7E7E]">
+          <div className="hidden lg:flex items-center gap-1.5 text-xs text-[#7E7E7E] font-medium">
             <Cloud className="w-3.5 h-3.5 text-emerald-400" />
             <span className="capitalize">{saveStatus}</span>
           </div>
@@ -177,17 +177,17 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
       </div>
 
       {/* Center: Figma-style Tool Palette */}
-      <div className="flex items-center gap-0.5 bg-[#1E1E1E] border border-[#383838] p-0.5 rounded-lg shadow-inner">
+      <div className="flex items-center gap-1 bg-[#1E1E1E] border border-[#383838] p-1 rounded-xl shadow-inner">
         {/* Undo / Redo */}
         <Tooltip content="Undo" shortcut="Ctrl+Z">
           <button
             type="button"
             onClick={undo}
             disabled={!canUndo}
-            className="p-1.5 rounded hover:bg-[#383838] text-[#B3B3B3] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#383838] text-[#B3B3B3] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             aria-label="Undo"
           >
-            <Undo2 className="w-3.5 h-3.5" />
+            <Undo2 className="w-4 h-4" />
           </button>
         </Tooltip>
 
@@ -196,14 +196,14 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
             type="button"
             onClick={redo}
             disabled={!canRedo}
-            className="p-1.5 rounded hover:bg-[#383838] text-[#B3B3B3] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#383838] text-[#B3B3B3] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             aria-label="Redo"
           >
-            <Redo2 className="w-3.5 h-3.5" />
+            <Redo2 className="w-4 h-4" />
           </button>
         </Tooltip>
 
-        <div className="w-[1px] h-4 bg-[#383838] mx-0.5" />
+        <div className="w-[1px] h-5 bg-[#383838] mx-1" />
 
         {/* Primary tools */}
         {primaryTools.map((t) => {
@@ -213,7 +213,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTool(t.id)}
-                className={`p-1.5 rounded transition-all ${
+                className={`p-2 rounded-lg transition-all ${
                   isActive
                     ? 'bg-[#0D99FF] text-white shadow-sm font-semibold'
                     : 'text-[#B3B3B3] hover:text-white hover:bg-[#383838]'
@@ -238,10 +238,10 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
           <button
             type="button"
             onClick={() => imageInputRef.current?.click()}
-            className="p-1.5 rounded text-[#B3B3B3] hover:text-white hover:bg-[#383838] transition-colors"
+            className="p-2 rounded-lg text-[#B3B3B3] hover:text-white hover:bg-[#383838] transition-colors"
             aria-label="Insert Image"
           >
-            <ImageIcon className="w-3.5 h-3.5" />
+            <ImageIcon className="w-4 h-4" />
           </button>
         </Tooltip>
 
@@ -249,39 +249,39 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
         <Tooltip content="Comments (C)" shortcut="C">
           <button
             type="button"
-            className="p-1.5 rounded text-[#7E7E7E] hover:text-white hover:bg-[#383838] transition-colors"
+            className="p-2 rounded-lg text-[#7E7E7E] hover:text-white hover:bg-[#383838] transition-colors"
             aria-label="Comments"
           >
-            <MessageSquare className="w-3.5 h-3.5" />
+            <MessageSquare className="w-4 h-4" />
           </button>
         </Tooltip>
       </div>
 
       {/* Right: Collaborators, Share, Export, Zoom & Profile */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {/* Collaborators overlapping avatars */}
         <div className="hidden md:flex items-center -space-x-1.5 mr-1">
           <div className="relative group cursor-pointer" title="Sarah Chen (Online)">
             <img
               src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80"
               alt="Sarah"
-              className="w-6 h-6 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-emerald-500"
+              className="w-7 h-7 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-emerald-500"
             />
           </div>
           <div className="relative group cursor-pointer" title="David Kim (Online)">
             <img
               src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80"
               alt="David"
-              className="w-6 h-6 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-emerald-500"
+              className="w-7 h-7 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-emerald-500"
             />
           </div>
           <div className="relative group cursor-pointer" title={user?.name || 'You (Active)'}>
             <img
               src={user?.avatar || '/avatar.jpg'}
               alt="You"
-              className="w-6 h-6 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-[#0D99FF]"
+              className="w-7 h-7 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-[#0D99FF]"
             />
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute bottom-0 right-0 ring-1 ring-[#2C2C2C]" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 absolute bottom-0 right-0 ring-1 ring-[#2C2C2C]" />
           </div>
         </div>
 
@@ -289,7 +289,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
         <button
           type="button"
           onClick={onOpenShare}
-          className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#0D99FF] hover:bg-[#0C8CE9] text-white text-xs font-semibold shadow-sm transition-colors active:scale-95"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0D99FF] hover:bg-[#0C8CE9] text-white text-xs font-bold shadow-sm transition-colors active:scale-95"
         >
           <Share2 className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Share</span>
@@ -299,7 +299,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
         <button
           type="button"
           onClick={onExport}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#383838] hover:bg-[#444444] text-white text-xs font-medium border border-[#444444] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#383838] hover:bg-[#444444] text-white text-xs font-semibold border border-[#444444] transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Export</span>
@@ -310,16 +310,16 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
           <button
             type="button"
             onClick={onOpenVersionHistory}
-            className="p-1.5 rounded hover:bg-[#383838] text-[#B3B3B3] hover:text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-[#383838] text-[#B3B3B3] hover:text-white transition-colors"
             aria-label="Version history"
           >
-            <History className="w-3.5 h-3.5" />
+            <History className="w-4 h-4" />
           </button>
         </Tooltip>
 
         {/* Zoom Controls */}
         <div className="relative">
-          <div className="flex items-center bg-[#1E1E1E] border border-[#383838] rounded text-xs px-1.5 py-0.5">
+          <div className="flex items-center bg-[#1E1E1E] border border-[#383838] rounded-lg text-xs px-2 py-1">
             <button
               type="button"
               onClick={() => zoomAt({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, 0.8)}
@@ -327,16 +327,16 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
               title="Zoom Out"
               aria-label="Zoom Out"
             >
-              <Minus className="w-3 h-3" />
+              <Minus className="w-3.5 h-3.5" />
             </button>
 
             <button
               type="button"
               onClick={() => setZoomDropdownOpen(!zoomDropdownOpen)}
-              className="px-1.5 font-mono text-[11px] text-white hover:text-[#0D99FF] flex items-center gap-1 transition-colors"
+              className="px-2 font-mono text-xs text-white hover:text-[#0D99FF] flex items-center gap-1 transition-colors font-semibold"
             >
               <span>{zoomPercent}%</span>
-              <ChevronDown className="w-2.5 h-2.5 text-[#7E7E7E]" />
+              <ChevronDown className="w-3 h-3 text-[#7E7E7E]" />
             </button>
 
             <button
@@ -346,7 +346,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
               title="Zoom In"
               aria-label="Zoom In"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -413,7 +413,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
           <img
             src={user?.avatar || '/avatar.jpg'}
             alt={user?.name || 'User'}
-            className="w-6 h-6 rounded-full object-cover border border-[#444444]"
+            className="w-7 h-7 rounded-full object-cover border border-[#444444]"
           />
         </button>
       </div>

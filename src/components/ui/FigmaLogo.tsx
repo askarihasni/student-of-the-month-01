@@ -4,15 +4,20 @@ export interface FigmaLogoProps {
   size?: number
   showWordmark?: boolean
   className?: string
+  textSize?: string
 }
 
 export const FigmaLogo: React.FC<FigmaLogoProps> = ({
-  size = 20,
+  size = 24,
   showWordmark = true,
   className = '',
+  textSize,
 }) => {
+  const isLarge = size >= 24
+  const fontCls = textSize || (isLarge ? 'text-base font-bold' : 'text-sm font-semibold')
+
   return (
-    <div className={`inline-flex items-center gap-2 select-none ${className}`}>
+    <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
       {/* 4-quadrant geometric logo: 3 rounded squircle tiles + 1 white circle */}
       <svg
         width={size}
@@ -34,11 +39,11 @@ export const FigmaLogo: React.FC<FigmaLogoProps> = ({
       </svg>
 
       {showWordmark && (
-        <div className="flex items-center gap-1.5 leading-none">
-          <span className="font-semibold text-white tracking-tight text-sm font-sans">
+        <div className="flex items-center gap-2 leading-none">
+          <span className={`text-white tracking-tight font-sans ${fontCls}`}>
             Mini Figma
           </span>
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold tracking-wider uppercase bg-[#383838] text-[#B3B3B3] border border-[#444444]">
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-[#383838] text-[#B3B3B3] border border-[#444444]">
             Pro
           </span>
         </div>
