@@ -101,7 +101,7 @@ export const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     loadProjects()
-  }, [])
+  }, [activeSection])
 
   // Section metadata configuration
   const sectionMeta = useMemo(() => {

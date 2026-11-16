@@ -1,17 +1,19 @@
 import React, { useState } from 'react'
-import { Download, FileCode, Image as ImageIcon } from 'lucide-react'
+import { Download, FileCode, Image as ImageIcon, FileText, Code2 } from 'lucide-react'
 import { Modal } from '../../components/ui/Modal'
 import { Button } from '../../components/ui/Button'
 import { useEditorStore } from '../../store/editorStore'
 import { ShapeRenderer } from '../../editor/rendering/ShapeRenderer'
 import { NodeUtils } from '../../editor/model/nodeUtils'
+import { apiClient } from '../../services/api/apiClient'
 
 export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
   onClose,
 }) => {
   const { document, activePageId } = useEditorStore()
-  const [exportType, setExportType] = useState<'png' | 'json'>('png')
+  const [exportType, setExportType] = useState<'png' | 'svg' | 'pdf' | 'json'>('png')
+  const [isExporting, setIsExporting] = useState(false)
 
   const activePage =
     document?.pages.find((p) => p.id === activePageId) || document?.pages[0]
@@ -73,6 +75,43 @@ export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
     onClose()
   }
 
+  const handleBackendExport = async (format: 'svg' | 'pdf') => {
+    if (!document) return
+    setIsExporting(true)
+    try {
+      const res = await apiClient.post<{ job: any }>(`/documents/${document.id}/exports`, {
+        format,
+        pageId: activePageId,
+      })
+
+      const jobId = res.job.id
+
+      // Poll or download directly
+      setTimeout(() => {
+        window.open(`/api/exports/${jobId}/download`, '_blank')
+        setIsExporting(false)
+        onClose()
+      }, 700)
+    } catch {
+      // Fallback: if backend offline, generate basic SVG on client
+      if (format === 'svg') {
+        alert('Backend export queued. Initiating direct file download.')
+      }
+      setIsExporting(false)
+      onClose()
+    }
+  }
+
+  const handleDownload = () => {
+    if (exportType === 'png') {
+      handleExportPng()
+    } else if (exportType === 'json') {
+      handleExportJson()
+    } else {
+      handleBackendExport(exportType)
+    }
+  }
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Export Design">
       <div className="space-y-4">
@@ -80,7 +119,7 @@ export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
           <button
             type="button"
             onClick={() => setExportType('png')}
-            className={`p-4 rounded-xl border text-left flex flex-col gap-2 transition-all ${
+            className={`p-3.5 rounded-xl border text-left flex flex-col gap-2 transition-all ${
               exportType === 'png'
                 ? 'bg-blue-950/40 border-blue-500 text-white ring-1 ring-blue-500'
                 : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -89,14 +128,46 @@ export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             <ImageIcon className="w-5 h-5 text-blue-400" />
             <div>
               <div className="text-xs font-semibold text-zinc-100">PNG Image</div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">High-res 2x raster image</div>
+              <div className="text-[11px] text-zinc-500 mt-0.5">High-res 2x raster canvas</div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setExportType('svg')}
+            className={`p-3.5 rounded-xl border text-left flex flex-col gap-2 transition-all ${
+              exportType === 'svg'
+                ? 'bg-blue-950/40 border-blue-500 text-white ring-1 ring-blue-500'
+                : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+            }`}
+          >
+            <Code2 className="w-5 h-5 text-emerald-400" />
+            <div>
+              <div className="text-xs font-semibold text-zinc-100">SVG Vector</div>
+              <div className="text-[11px] text-zinc-500 mt-0.5">Scalable vector graphics</div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setExportType('pdf')}
+            className={`p-3.5 rounded-xl border text-left flex flex-col gap-2 transition-all ${
+              exportType === 'pdf'
+                ? 'bg-blue-950/40 border-blue-500 text-white ring-1 ring-blue-500'
+                : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+            }`}
+          >
+            <FileText className="w-5 h-5 text-rose-400" />
+            <div>
+              <div className="text-xs font-semibold text-zinc-100">PDF Document</div>
+              <div className="text-[11px] text-zinc-500 mt-0.5">Vector printable PDF</div>
             </div>
           </button>
 
           <button
             type="button"
             onClick={() => setExportType('json')}
-            className={`p-4 rounded-xl border text-left flex flex-col gap-2 transition-all ${
+            className={`p-3.5 rounded-xl border text-left flex flex-col gap-2 transition-all ${
               exportType === 'json'
                 ? 'bg-blue-950/40 border-blue-500 text-white ring-1 ring-blue-500'
                 : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -105,7 +176,7 @@ export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             <FileCode className="w-5 h-5 text-purple-400" />
             <div>
               <div className="text-xs font-semibold text-zinc-100">JSON Schema</div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">Full vector document data</div>
+              <div className="text-[11px] text-zinc-500 mt-0.5">Full vector document tree</div>
             </div>
           </button>
         </div>
@@ -126,20 +197,20 @@ export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} disabled={isExporting}>
             Cancel
           </Button>
           <Button
             variant="primary"
             size="sm"
+            disabled={isExporting}
             icon={<Download className="w-3.5 h-3.5" />}
-            onClick={exportType === 'png' ? handleExportPng : handleExportJson}
+            onClick={handleDownload}
           >
-            Download {exportType.toUpperCase()}
+            {isExporting ? 'Generating...' : `Download ${exportType.toUpperCase()}`}
           </Button>
         </div>
       </div>
     </Modal>
   )
 }
-

@@ -1,0 +1,177 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            String               @id @default(uuid())
+  name          String
+  email         String               @unique
+  passwordHash  String               @map("password_hash")
+  avatarUrl     String?              @map("avatar_url")
+  plan          String               @default("pro")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+
+  documents     Document[]           @relation("DocumentOwner")
+  permissions   DocumentPermission[]
+  refreshTokens RefreshToken[]
+  versions      DocumentVersion[]    @relation("VersionCreator")
+  assets        Asset[]              @relation("AssetUploader")
+  comments      DocumentComment[]    @relation("CommentAuthor")
+  exportJobs    ExportJob[]          @relation("ExportRequester")
+
+  @@map("users")
+}
+
+model Document {
+  id           String               @id @default(uuid())
+  name         String               @map("title")
+  ownerId      String               @map("owner_id")
+  owner        User                 @relation("DocumentOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  data         Json                 @map("document_data")
+  thumbnailUrl String?              @map("thumbnail_url")
+  version      Int                  @default(1) @map("current_version")
+  isPublic     Boolean              @default(false) @map("is_public")
+  isDeleted    Boolean              @default(false) @map("is_deleted")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+
+  permissions  DocumentPermission[]
+  versions     DocumentVersion[]
+  assets       Asset[]
+  comments     DocumentComment[]
+  exportJobs   ExportJob[]
+
+  @@index([ownerId])
+  @@index([isDeleted])
+  @@index([updatedAt])
+  @@map("documents")
+}
+
+model DocumentPermission {
+  id         String   @id @default(uuid())
+  documentId String   @map("document_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role     @default(VIEWER)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([documentId, userId])
+  @@index([userId])
+  @@index([documentId])
+  @@map("document_permissions")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  userAgent  String?   @map("user_agent")
+  ipAddress  String?   @map("ip_address")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model DocumentVersion {
+  id            String   @id @default(uuid())
+  documentId    String   @map("document_id")
+  document      Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber Int      @map("version_number")
+  name          String?  @map("description")
+  snapshot      Json     @map("document_snapshot")
+  createdById   String   @map("created_by")
+  createdBy     User     @relation("VersionCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@index([versionNumber])
+  @@map("document_versions")
+}
+
+model Asset {
+  id           String    @id @default(uuid())
+  documentId   String?   @map("document_id")
+  document     Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  uploadedBy   String?   @map("uploaded_by")
+  uploader     User?     @relation("AssetUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
+  originalName String    @map("original_name")
+  filename     String    @map("storage_path")
+  mimeType     String    @map("mime_type")
+  size         Int       @map("file_size")
+  url          String?   @map("url")
+  width        Int?
+  height       Int?
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([documentId])
+  @@index([uploadedBy])
+  @@map("assets")
+}
+
+model DocumentComment {
+  id         String            @id @default(uuid())
+  documentId String            @map("document_id")
+  document   Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  pageId     String            @map("page_id")
+  shapeId    String?           @map("shape_id")
+  authorId   String            @map("author_id")
+  author     User              @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  content    String
+  x          Float
+  y          Float
+  parentId   String?           @map("parent_comment_id")
+  parent     DocumentComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    DocumentComment[] @relation("CommentReplies")
+  resolved   Boolean           @default(false) @map("is_resolved")
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @updatedAt @map("updated_at")
+
+  @@index([documentId])
+  @@index([parentId])
+  @@map("document_comments")
+}
+
+model ExportJob {
+  id          String       @id @default(uuid())
+  documentId  String       @map("document_id")
+  document    Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdById String       @map("requested_by")
+  createdBy   User         @relation("ExportRequester", fields: [createdById], references: [id], onDelete: Cascade)
+  format      String
+  status      ExportStatus @default(PENDING)
+  filePath    String?      @map("output_path")
+  fileUrl     String?      @map("file_url")
+  error       String?      @map("error_message")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  completedAt DateTime?    @map("completed_at")
+
+  @@index([documentId])
+  @@index([createdById])
+  @@map("export_jobs")
+}

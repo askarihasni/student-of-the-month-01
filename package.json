@@ -9,12 +9,19 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "server:dev": "npm --prefix server run dev",
+    "server:build": "npm --prefix server run build",
+    "server:start": "npm --prefix server run start",
+    "server:test": "npm --prefix server run test",
+    "server:seed": "npm --prefix server run prisma:seed",
+    "test:all": "vitest run && npm --prefix server run test"
   },
   "dependencies": {
     "lucide-react": "^1.73.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "socket.io-client": "^4.8.4",
     "zod": "^4.6.7",
     "zustand": "^5.1.0"
   },

@@ -20,6 +20,9 @@ import {
 } from '../../editor/model/factory'
 import { useEditorStore } from '../../store/editorStore'
 import { FloatingContextToolbar } from './FloatingContextToolbar'
+import { useCollaboration } from '../../services/collaboration/useCollaboration'
+import { PeerCursorOverlay } from './PeerCursorOverlay'
+import { apiClient } from '../../services/api/apiClient'
 
 export const CanvasViewport: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -51,6 +54,9 @@ export const CanvasViewport: React.FC = () => {
   const activePage =
     document?.pages.find((p) => p.id === activePageId) || document?.pages[0]
   const nodes = activePage?.nodes || []
+
+  // Real-time peer collaboration
+  const { peers, sendCursorMove } = useCollaboration(document?.id, activePageId)
 
   // Interaction tracking state
   const isPointerDownRef = useRef(false)
@@ -291,6 +297,7 @@ export const CanvasViewport: React.FC = () => {
     const screenPos = getScreenPoint(e)
     const worldPos = ViewportController.screenToWorld(screenPos, viewport)
     setCurrentWorldPointer(worldPos)
+    sendCursorMove(worldPos.x, worldPos.y)
 
     if (!isPointerDownRef.current) {
       // Update cursor and hover state when not dragging
@@ -587,6 +594,15 @@ export const CanvasViewport: React.FC = () => {
           name: file.name.replace(/\.[^/.]+$/, ''),
         })
         addNode(imgNode)
+
+        // Upload to persistent backend asset storage
+        if (document?.id) {
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('width', String(Math.round(width)))
+          formData.append('height', String(Math.round(height)))
+          apiClient.post<{ asset: any }>(`/documents/${document.id}/assets`, formData).catch(() => {})
+        }
       }
       img.src = src
     }
@@ -611,6 +627,9 @@ export const CanvasViewport: React.FC = () => {
         onContextMenu={(e) => e.preventDefault()}
         className="block w-full h-full touch-none"
       />
+
+      {/* Real-time collaborator cursors */}
+      <PeerCursorOverlay peers={peers} viewport={viewport} activePageId={activePageId} />
 
       {/* Floating contextual toolbar on selection */}
       <FloatingContextToolbar />

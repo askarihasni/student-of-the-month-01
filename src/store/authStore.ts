@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { User } from '../services/auth/AuthAdapter'
-import { authAdapter } from '../services/auth/MockAuthAdapter'
+import { httpAuthAdapter as authAdapter } from '../services/auth/HttpAuthAdapter'
 
 interface AuthState {
   user: User | null

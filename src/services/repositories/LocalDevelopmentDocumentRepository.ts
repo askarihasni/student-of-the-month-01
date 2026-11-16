@@ -1,5 +1,6 @@
 import type { DocumentModel, ProjectMetadata, DocumentVersion } from '../../types/document'
 import type { DocumentRepository } from './DocumentRepository'
+import { httpDocumentRepository } from './HttpDocumentRepository'
 import {
   createDefaultDocument,
   generateId,
@@ -318,10 +319,22 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
   }
 
   async getAll(): Promise<ProjectMetadata[]> {
+    try {
+      const remote = await httpDocumentRepository.getAll()
+      if (remote && remote.length > 0) return remote
+    } catch {
+      // Backend offline or running in mock mode
+    }
     return this.getMetadataList()
   }
 
   async getById(id: string): Promise<DocumentModel | null> {
+    try {
+      const remote = await httpDocumentRepository.getById(id)
+      if (remote) return remote
+    } catch {
+      // Backend offline
+    }
     try {
       const raw = localStorage.getItem(STORAGE_KEY_PREFIX + id)
       if (!raw) return null
@@ -340,21 +353,48 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
   }
 
   async save(document: DocumentModel): Promise<void> {
-    const updatedDoc: DocumentModel = {
-      ...document,
-      updatedAt: Date.now(),
-      version: document.version + 1,
+    try {
+      await httpDocumentRepository.save(document)
+      this.saveSync(document)
+      return
+    } catch (err: any) {
+      if (err?.status === 409) {
+        throw err
+      }
+      const updatedDoc: DocumentModel = {
+        ...document,
+        updatedAt: Date.now(),
+        version: document.version + 1,
+      }
+      this.saveSync(updatedDoc)
     }
-    this.saveSync(updatedDoc)
   }
 
   async create(name = 'Untitled Design'): Promise<DocumentModel> {
+    try {
+      const remote = await httpDocumentRepository.create(name)
+      if (remote) {
+        this.saveSync(remote)
+        return remote
+      }
+    } catch {
+      // Backend offline
+    }
     const doc = createDefaultDocument(name)
     this.saveSync(doc)
     return doc
   }
 
   async duplicate(id: string): Promise<DocumentModel> {
+    try {
+      const remote = await httpDocumentRepository.duplicate(id)
+      if (remote) {
+        this.saveSync(remote)
+        return remote
+      }
+    } catch {
+      // Backend offline
+    }
     const orig = await this.getById(id)
     if (!orig) throw new Error(`Document ${id} not found`)
 
@@ -372,6 +412,11 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
   }
 
   async delete(id: string): Promise<void> {
+    try {
+      await httpDocumentRepository.delete(id)
+    } catch {
+      // Backend offline
+    }
     localStorage.removeItem(STORAGE_KEY_PREFIX + id)
     localStorage.removeItem(VERSIONS_KEY_PREFIX + id)
     const metaList = this.getMetadataList().filter(m => m.id !== id)
@@ -379,6 +424,11 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
   }
 
   async rename(id: string, newName: string): Promise<void> {
+    try {
+      await httpDocumentRepository.rename(id, newName)
+    } catch {
+      // Backend offline
+    }
     const doc = await this.getById(id)
     if (!doc) return
     doc.name = newName
@@ -386,6 +436,12 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
   }
 
   async getVersions(id: string): Promise<DocumentVersion[]> {
+    try {
+      const remote = await httpDocumentRepository.getVersions(id)
+      if (remote && remote.length > 0) return remote
+    } catch {
+      // Backend offline
+    }
     try {
       const raw = localStorage.getItem(VERSIONS_KEY_PREFIX + id)
       if (!raw) return []
@@ -396,6 +452,12 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
   }
 
   async saveVersion(id: string, label: string): Promise<DocumentVersion> {
+    try {
+      const remote = await httpDocumentRepository.saveVersion(id, label)
+      if (remote) return remote
+    } catch {
+      // Backend offline
+    }
     const doc = await this.getById(id)
     if (!doc) throw new Error('Document not found')
 
@@ -409,13 +471,18 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
     }
 
     versions.unshift(version)
-    // Keep last 20 snapshots
     const trimmed = versions.slice(0, 20)
     localStorage.setItem(VERSIONS_KEY_PREFIX + id, JSON.stringify(trimmed))
     return version
   }
 
   async restoreVersion(id: string, versionId: string): Promise<DocumentModel> {
+    try {
+      const remote = await httpDocumentRepository.restoreVersion(id, versionId)
+      if (remote) return remote
+    } catch {
+      // Backend offline
+    }
     const versions = await this.getVersions(id)
     const match = versions.find(v => v.id === versionId)
     if (!match) throw new Error('Version snapshot not found')
