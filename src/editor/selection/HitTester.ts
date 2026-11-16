@@ -1,4 +1,14 @@
-import type { DesignNode, RectangleNode, FrameNode, EllipseNode, LineNode, TextNode, ImageNode, PathNode } from '../../types/document'
+import type {
+  DesignNode,
+  RectangleNode,
+  FrameNode,
+  EllipseNode,
+  LineNode,
+  TextNode,
+  ImageNode,
+  PathNode,
+  PathPoint,
+} from '../../types/document'
 import type { Point } from '../math/Vector2D'
 import { Vector2D } from '../math/Vector2D'
 import type { Rect } from '../math/Geometry'
@@ -87,13 +97,14 @@ export class HitTester {
 
         // If closed path and filled, also test polygon containment
         if (node.closed && node.fill && node.fill !== 'transparent') {
-          const poly = pts.map(pt => pt.point)
+          const poly = pts.map((pt: PathPoint) => pt.point)
           if (Geometry.pointInPolygon(p, poly)) return true
         }
 
         return false
       }
-      case 'group': {
+      case 'group':
+      default: {
         // Group hit test delegated to its children
         return false
       }

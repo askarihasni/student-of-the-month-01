@@ -1,6 +1,16 @@
 import type { MatrixTuple } from '../editor/math/Matrix3x3'
 import type { Point } from '../editor/math/Vector2D'
 
+export type EditorTool =
+  | 'select'
+  | 'frame'
+  | 'rectangle'
+  | 'ellipse'
+  | 'line'
+  | 'pen'
+  | 'text'
+  | 'hand'
+
 export type NodeType =
   | 'rectangle'
   | 'ellipse'
@@ -100,6 +110,7 @@ export interface FrameNode extends BaseNode {
   cornerRadius?: number
   clipContent: boolean
   childrenIds: string[]
+  shadow?: ShadowEffect
 }
 
 export interface PathNode extends BaseNode {
@@ -137,6 +148,23 @@ export type DesignNode =
   | PathNode
   | ImageNode
   | GroupNode
+
+export type BoxNode =
+  | RectangleNode
+  | EllipseNode
+  | TextNode
+  | FrameNode
+  | ImageNode
+
+export function isBoxNode(node: DesignNode): node is BoxNode {
+  return (
+    node.type === 'rectangle' ||
+    node.type === 'ellipse' ||
+    node.type === 'text' ||
+    node.type === 'frame' ||
+    node.type === 'image'
+  )
+}
 
 export interface Page {
   id: string

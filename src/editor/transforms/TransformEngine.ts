@@ -1,4 +1,4 @@
-import type { DesignNode } from '../../types/document'
+import { type DesignNode, type PathPoint, isBoxNode } from '../../types/document'
 import type { Rect } from '../math/Geometry'
 import { Geometry } from '../math/Geometry'
 import type { Point } from '../math/Vector2D'
@@ -43,7 +43,7 @@ export class TransformEngine {
         case 'path': {
           return {
             ...node,
-            points: node.points.map(pt => ({
+            points: node.points.map((pt: PathPoint) => ({
               ...pt,
               point: { x: pt.point.x + dx, y: pt.point.y + dy },
               handleIn: pt.handleIn ? { x: pt.handleIn.x + dx, y: pt.handleIn.y + dy } : undefined,
@@ -52,6 +52,7 @@ export class TransformEngine {
           }
         }
         case 'group':
+        default:
           return node
       }
     })
@@ -69,7 +70,7 @@ export class TransformEngine {
     initialPointer: Point,
     options: ResizeOptions = {}
   ): DesignNode {
-    if (node.type === 'line' || node.type === 'path' || node.type === 'group') {
+    if (!isBoxNode(node) || !isBoxNode(initialNode)) {
       return node
     }
 

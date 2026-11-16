@@ -1,4 +1,12 @@
-import type { DesignNode, RectangleNode, FrameNode, EllipseNode, TextNode, ImageNode } from '../../types/document'
+import type {
+  DesignNode,
+  RectangleNode,
+  FrameNode,
+  EllipseNode,
+  TextNode,
+  ImageNode,
+  PathPoint,
+} from '../../types/document'
 import type { Rect } from '../math/Geometry'
 import { Geometry } from '../math/Geometry'
 import type { Point } from '../math/Vector2D'
@@ -31,10 +39,11 @@ export class NodeUtils {
         return { x: minX, y: minY, width, height }
       }
       case 'path': {
-        const pts = node.points.map(p => p.point)
+        const pts = node.points.map((p: PathPoint) => p.point)
         return Geometry.getBoundsForPoints(pts)
       }
       case 'group':
+      default:
         return { x: 0, y: 0, width: 0, height: 0 }
     }
   }
@@ -72,7 +81,7 @@ export class NodeUtils {
     }
 
     if (node.type === 'path') {
-      const pts = node.points.map(p => p.point)
+      const pts = node.points.map((p: PathPoint) => p.point)
       return Geometry.getBoundsForPoints(pts)
     }
 
@@ -152,7 +161,7 @@ export class NodeUtils {
           ...node,
           id,
           name,
-          points: node.points.map(p => ({
+          points: node.points.map((p: PathPoint) => ({
             ...p,
             id: generateId('pt'),
             point: { x: p.point.x + offset.x, y: p.point.y + offset.y },
@@ -161,7 +170,8 @@ export class NodeUtils {
           })),
         }
       }
-      case 'group': {
+      case 'group':
+      default: {
         return {
           ...node,
           id,

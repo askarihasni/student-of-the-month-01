@@ -102,6 +102,7 @@ export const FrameNodeSchema = BaseNodeSchema.extend({
   cornerRadius: z.number().min(0).optional(),
   clipContent: z.boolean(),
   childrenIds: z.array(z.string()),
+  shadow: ShadowEffectSchema.optional(),
 })
 
 export const PathNodeSchema = BaseNodeSchema.extend({
