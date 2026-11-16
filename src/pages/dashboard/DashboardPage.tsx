@@ -206,7 +206,7 @@ export const DashboardPage: React.FC = () => {
               className="flex items-center p-0.5 rounded-full hover:ring-2 hover:ring-[#0D99FF] transition-all focus:outline-none"
             >
               <img
-                src={user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80'}
+                src={user?.avatar || '/avatar.jpg'}
                 alt={user?.name || 'User'}
                 className="w-7 h-7 rounded-full object-cover border border-[#444444]"
               />
@@ -216,11 +216,18 @@ export const DashboardPage: React.FC = () => {
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                 <div className="absolute right-0 mt-2 w-60 bg-[#2C2C2C] border border-[#383838] rounded-xl shadow-2xl z-50 py-1.5 text-xs text-[#B3B3B3]">
-                  <div className="px-4 py-2.5 border-b border-[#383838]">
-                    <div className="font-semibold text-white">{user?.name || 'Askari Hasni'}</div>
-                    <div className="text-[11px] text-[#7E7E7E] truncate">{user?.email || 'designer@minifigma.io'}</div>
-                    <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-[#0D99FF]/15 text-[#0D99FF] rounded text-[10px] font-semibold border border-[#0D99FF]/30">
-                      <Sparkles className="w-3 h-3" /> Pro Workspace
+                  <div className="px-4 py-2.5 border-b border-[#383838] flex items-center gap-3">
+                    <img
+                      src={user?.avatar || '/avatar.jpg'}
+                      alt={user?.name || 'User'}
+                      className="w-9 h-9 rounded-full object-cover border border-[#444444] shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-white truncate">{user?.name || 'Askari Hasni'}</div>
+                      <div className="text-[11px] text-[#7E7E7E] truncate">{user?.email || 'designer@minifigma.io'}</div>
+                      <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#0D99FF]/15 text-[#0D99FF] rounded text-[9px] font-semibold border border-[#0D99FF]/30">
+                        <Sparkles className="w-2.5 h-2.5" /> Pro Workspace
+                      </div>
                     </div>
                   </div>
 

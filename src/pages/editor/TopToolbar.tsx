@@ -277,10 +277,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
           </div>
           <div className="relative group cursor-pointer" title={user?.name || 'You (Active)'}>
             <img
-              src={
-                user?.avatar ||
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80'
-              }
+              src={user?.avatar || '/avatar.jpg'}
               alt="You"
               className="w-6 h-6 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-[#0D99FF]"
             />
@@ -404,6 +401,21 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
             </>
           )}
         </div>
+
+        {/* User Profile Avatar */}
+        <button
+          type="button"
+          onClick={closeDocument}
+          className="flex items-center p-0.5 rounded-full hover:ring-2 hover:ring-[#0D99FF] transition-all focus:outline-none ml-1"
+          title={`${user?.name || 'Askari Hasni'} (Click to view dashboard)`}
+          aria-label="User Profile"
+        >
+          <img
+            src={user?.avatar || '/avatar.jpg'}
+            alt={user?.name || 'User'}
+            className="w-6 h-6 rounded-full object-cover border border-[#444444]"
+          />
+        </button>
       </div>
     </header>
   )

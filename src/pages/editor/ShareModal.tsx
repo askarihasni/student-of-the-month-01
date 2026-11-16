@@ -99,10 +99,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="relative">
                 <img
-                  src={
-                    user?.avatar ||
-                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80'
-                  }
+                  src={user?.avatar || '/avatar.jpg'}
                   alt={user?.name || 'Owner'}
                   className="w-7 h-7 rounded-full object-cover border border-[#444444]"
                 />

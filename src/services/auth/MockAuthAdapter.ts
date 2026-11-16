@@ -8,7 +8,7 @@ export class MockAuthAdapter implements AuthAdapter {
     id: 'usr_senior_designer_01',
     name: 'Askari Hasni',
     email: 'designer@minifigma.io',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+    avatar: '/avatar.jpg',
     plan: 'pro',
   }
 
@@ -53,7 +53,7 @@ export class MockAuthAdapter implements AuthAdapter {
       id: `usr_${Date.now().toString(36)}`,
       name: email.split('@')[0].replace(/[._]/g, ' '),
       email,
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80',
+      avatar: '/avatar.jpg',
       plan: 'pro',
     }
 
@@ -98,7 +98,7 @@ export class MockAuthAdapter implements AuthAdapter {
       id: `usr_${Date.now().toString(36)}`,
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80',
+      avatar: '/avatar.jpg',
       plan: 'pro',
     }
 
@@ -127,9 +127,13 @@ export class MockAuthAdapter implements AuthAdapter {
     try {
       const raw = localStorage.getItem(AUTH_USER_STORAGE_KEY)
       if (raw) {
-        return JSON.parse(raw) as User
+        const u = JSON.parse(raw) as User
+        if (!u.avatar || u.avatar.includes('unsplash.com')) {
+          u.avatar = '/avatar.jpg'
+          localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(u))
+        }
+        return u
       }
-      // Return default logged in user in dev mode if nothing saved
       return this.defaultUser
     } catch {
       return this.defaultUser
