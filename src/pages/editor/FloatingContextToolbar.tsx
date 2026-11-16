@@ -25,6 +25,7 @@ export const FloatingContextToolbar: React.FC = () => {
     reorderNode,
     groupSelected,
     updateNode,
+    alignSelected,
   } = useEditorStore()
 
   const activePage =
@@ -44,15 +45,7 @@ export const FloatingContextToolbar: React.FC = () => {
   const aabb = NodeUtils.getNodesAABB(selectedNodes)
 
   const handleAlign = (type: 'left' | 'center' | 'right') => {
-    for (const node of selectedNodes) {
-      if ('x' in node && 'width' in node) {
-        let newX = node.x
-        if (type === 'left') newX = aabb.x
-        if (type === 'center') newX = aabb.x + (aabb.width - node.width) / 2
-        if (type === 'right') newX = aabb.x + aabb.width - node.width
-        updateNode(node.id, { x: Math.round(newX) })
-      }
-    }
+    alignSelected(type)
   }
 
   return (

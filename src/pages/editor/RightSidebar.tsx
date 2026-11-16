@@ -38,6 +38,7 @@ export const RightSidebar: React.FC = () => {
     selectedNodeIds,
     updateNode,
     updateNodes,
+    alignSelected,
   } = useEditorStore()
 
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -153,24 +154,7 @@ export const RightSidebar: React.FC = () => {
 
   // Alignment helpers
   const handleAlign = (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
-    if (selectedNodes.length === 0) return
-    const aabb = NodeUtils.getNodesAABB(selectedNodes)
-
-    for (const node of selectedNodes) {
-      if ('x' in node && 'y' in node) {
-        let newX = node.x
-        let newY = node.y
-
-        if (alignment === 'left') newX = aabb.x
-        if (alignment === 'center') newX = aabb.x + (aabb.width - node.width) / 2
-        if (alignment === 'right') newX = aabb.x + aabb.width - node.width
-        if (alignment === 'top') newY = aabb.y
-        if (alignment === 'middle') newY = aabb.y + (aabb.height - node.height) / 2
-        if (alignment === 'bottom') newY = aabb.y + aabb.height - node.height
-
-        updateNode(node.id, { x: Math.round(newX), y: Math.round(newY) })
-      }
-    }
+    alignSelected(alignment)
   }
 
   const handleWidthChange = (newWidth: number) => {

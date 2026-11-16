@@ -118,3 +118,74 @@ describe('HistoryManager', () => {
   })
 })
 
+describe('Alignment Engine', () => {
+  it('aligns multiple items to collective bounding box', async () => {
+    const { useEditorStore } = await import('../store/editorStore')
+    const { createFrame, createRectangle } = await import('../editor/model/factory')
+
+    const r1 = createRectangle({ id: 'r1', x: 100, y: 100, width: 50, height: 50 })
+    const r2 = createRectangle({ id: 'r2', x: 200, y: 150, width: 50, height: 50 })
+
+    const testDoc = {
+      id: 'doc_align_test',
+      name: 'Align Test',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      version: 1,
+      activePageId: 'p1',
+      pages: [{ id: 'p1', name: 'P1', backgroundColor: '#fff', nodes: [r1, r2] }],
+    }
+
+    useEditorStore.getState().setDocument(testDoc)
+    useEditorStore.getState().selectNodes(['r1', 'r2'])
+
+    // Align Left: both should align to x = 100
+    useEditorStore.getState().alignSelected('left')
+    let nodes = useEditorStore.getState().document!.pages[0].nodes
+    expect((nodes.find(n => n.id === 'r1') as any).x).toBe(100)
+    expect((nodes.find(n => n.id === 'r2') as any).x).toBe(100)
+
+    // Align Top: both should align to y = 100
+    useEditorStore.getState().alignSelected('top')
+    nodes = useEditorStore.getState().document!.pages[0].nodes
+    expect((nodes.find(n => n.id === 'r1') as any).y).toBe(100)
+    expect((nodes.find(n => n.id === 'r2') as any).y).toBe(100)
+  })
+
+  it('aligns single child item to enclosing parent frame', async () => {
+    const { useEditorStore } = await import('../store/editorStore')
+    const { createFrame, createRectangle } = await import('../editor/model/factory')
+
+    const frame = createFrame({ id: 'f1', x: 100, y: 100, width: 400, height: 600 })
+    const btn = createRectangle({ id: 'btn', x: 150, y: 200, width: 100, height: 50, parentId: 'f1' })
+
+    const testDoc = {
+      id: 'doc_single_align',
+      name: 'Single Align',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      version: 1,
+      activePageId: 'p1',
+      pages: [{ id: 'p1', name: 'P1', backgroundColor: '#fff', nodes: [frame, btn] }],
+    }
+
+    useEditorStore.getState().setDocument(testDoc)
+    useEditorStore.getState().selectNode('btn')
+
+    // Align Center inside frame (x: 100, width: 400 => center: 300, btn width: 100 => x: 250)
+    useEditorStore.getState().alignSelected('center')
+    let nodes = useEditorStore.getState().document!.pages[0].nodes
+    expect((nodes.find(n => n.id === 'btn') as any).x).toBe(250)
+
+    // Align Right inside frame (100 + 400 - 100 = 400)
+    useEditorStore.getState().alignSelected('right')
+    nodes = useEditorStore.getState().document!.pages[0].nodes
+    expect((nodes.find(n => n.id === 'btn') as any).x).toBe(400)
+
+    // Align Left inside frame (x = 100)
+    useEditorStore.getState().alignSelected('left')
+    nodes = useEditorStore.getState().document!.pages[0].nodes
+    expect((nodes.find(n => n.id === 'btn') as any).x).toBe(100)
+  })
+})
+

@@ -12,6 +12,7 @@ export function useKeyboardShortcuts() {
     clearSelection,
     selectNodes,
     setActiveTool,
+    alignSelected,
     document,
     activePageId,
   } = useEditorStore()
@@ -101,6 +102,40 @@ export function useKeyboardShortcuts() {
         return
       }
 
+      // Alt + Alignment shortcuts (Figma standard)
+      if (e.altKey && !modifier) {
+        if (e.code === 'KeyA') {
+          e.preventDefault()
+          alignSelected('left')
+          return
+        }
+        if (e.code === 'KeyD') {
+          e.preventDefault()
+          alignSelected('right')
+          return
+        }
+        if (e.code === 'KeyW') {
+          e.preventDefault()
+          alignSelected('top')
+          return
+        }
+        if (e.code === 'KeyS') {
+          e.preventDefault()
+          alignSelected('bottom')
+          return
+        }
+        if (e.code === 'KeyH') {
+          e.preventDefault()
+          alignSelected('center')
+          return
+        }
+        if (e.code === 'KeyV') {
+          e.preventDefault()
+          alignSelected('middle')
+          return
+        }
+      }
+
       // Tool shortcuts (without modifier)
       if (!modifier && !e.altKey) {
         switch (e.code) {
@@ -144,6 +179,7 @@ export function useKeyboardShortcuts() {
     clearSelection,
     selectNodes,
     setActiveTool,
+    alignSelected,
     document,
     activePageId,
   ])

@@ -8,6 +8,7 @@ import type { TransformHandleType } from '../editor/selection/HitTester'
 import type { AlignmentGuide } from '../editor/transforms/SnapEngine'
 import { HistoryManager } from '../editor/history/HistoryManager'
 import { NodeUtils } from '../editor/model/nodeUtils'
+import { TransformEngine } from '../editor/transforms/TransformEngine'
 import { generateId, createGroup } from '../editor/model/factory'
 import { normalizeDocument } from '../editor/model/normalizeDocument'
 import { documentRepository } from '../services/repositories/LocalDevelopmentDocumentRepository'
@@ -69,6 +70,7 @@ interface EditorState {
   paste: () => void
   groupSelected: () => void
   ungroupSelected: () => void
+  alignSelected: (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void
 
   reorderNode: (id: string, direction: 'front' | 'back' | 'forward' | 'backward') => void
   moveNodeInList: (sourceIndex: number, targetIndex: number) => void
@@ -502,6 +504,136 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       document: updatedDoc,
       selectedNodeIds: [],
+      canUndo: historyManager.canUndo(),
+      canRedo: historyManager.canRedo(),
+      saveStatus: 'unsaved',
+    })
+    get().saveDocumentNow()
+  },
+
+  alignSelected: (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
+    const { document, activePageId, selectedNodeIds, viewport } = get()
+    if (!document || selectedNodeIds.length === 0) return
+
+    const activePage = document.pages.find((p) => p.id === activePageId) || document.pages[0]
+    if (!activePage) return
+
+    const rawNodes = activePage.nodes
+    const pageNodes: DesignNode[] = Array.isArray(rawNodes)
+      ? (rawNodes as DesignNode[])
+      : rawNodes && typeof rawNodes === 'object'
+      ? (Object.values(rawNodes) as DesignNode[])
+      : []
+
+    const selectedNodes = pageNodes.filter((n) => selectedNodeIds.includes(n.id))
+    if (selectedNodes.length === 0) return
+
+    let targetBounds: Rect
+
+    if (selectedNodes.length >= 2) {
+      // Multi-selection: align to collective bounding box of selected elements
+      targetBounds = NodeUtils.getNodesAABB(selectedNodes)
+    } else {
+      // Single selection:
+      const single = selectedNodes[0]
+      const singleAABB = NodeUtils.getNodeAABB(single)
+
+      // Check if parent frame exists by parentId
+      let parentFrame: DesignNode | undefined
+      if (single.parentId) {
+        parentFrame = pageNodes.find((n) => n.id === single.parentId)
+      }
+
+      // If no explicit parentId, find any enclosing frame on the page
+      if (!parentFrame) {
+        parentFrame = pageNodes.find(
+          (n) =>
+            n.type === 'frame' &&
+            n.id !== single.id &&
+            'width' in n &&
+            'height' in n &&
+            n.x <= singleAABB.x + 5 &&
+            n.y <= singleAABB.y + 5 &&
+            n.x + n.width >= singleAABB.x + singleAABB.width - 5 &&
+            n.y + n.height >= singleAABB.y + singleAABB.height - 5
+        )
+      }
+
+      // If not strictly inside a frame, check if there is another frame on the page
+      if (!parentFrame && single.type !== 'frame') {
+        parentFrame = pageNodes.find((n) => n.type === 'frame' && n.id !== single.id)
+      }
+
+      if (parentFrame) {
+        targetBounds = NodeUtils.getNodeAABB(parentFrame)
+      } else {
+        // Standalone artboard/canvas alignment relative to viewport center
+        const screenW = typeof window !== 'undefined' ? window.innerWidth : 1200
+        const screenH = typeof window !== 'undefined' ? window.innerHeight : 800
+        const worldCenterX = Math.round(-viewport.x + (screenW / 2) / viewport.zoom)
+        const worldCenterY = Math.round(-viewport.y + (screenH / 2) / viewport.zoom)
+
+        targetBounds = {
+          x: worldCenterX - 450,
+          y: worldCenterY - 300,
+          width: 900,
+          height: 600,
+        }
+      }
+    }
+
+    const updatedNodesMap = new Map<string, DesignNode>()
+
+    for (const node of selectedNodes) {
+      const nodeAABB = NodeUtils.getNodeAABB(node)
+      let dx = 0
+      let dy = 0
+
+      if (alignment === 'left') {
+        dx = targetBounds.x - nodeAABB.x
+      } else if (alignment === 'center') {
+        const targetCenterX = targetBounds.x + targetBounds.width / 2
+        const nodeCenterX = nodeAABB.x + nodeAABB.width / 2
+        dx = targetCenterX - nodeCenterX
+      } else if (alignment === 'right') {
+        const targetRight = targetBounds.x + targetBounds.width
+        const nodeRight = nodeAABB.x + nodeAABB.width
+        dx = targetRight - nodeRight
+      } else if (alignment === 'top') {
+        dy = targetBounds.y - nodeAABB.y
+      } else if (alignment === 'middle') {
+        const targetCenterY = targetBounds.y + targetBounds.height / 2
+        const nodeCenterY = nodeAABB.y + nodeAABB.height / 2
+        dy = targetCenterY - nodeCenterY
+      } else if (alignment === 'bottom') {
+        const targetBottom = targetBounds.y + targetBounds.height
+        const nodeBottom = nodeAABB.y + nodeAABB.height
+        dy = targetBottom - nodeBottom
+      }
+
+      if (Math.round(dx) !== 0 || Math.round(dy) !== 0) {
+        const [moved] = TransformEngine.moveNodes([node], Math.round(dx), Math.round(dy))
+        updatedNodesMap.set(node.id, moved)
+      }
+    }
+
+    if (updatedNodesMap.size === 0) return
+
+    const updatedPages = document.pages.map((p) => {
+      if (p.id !== activePage.id) return p
+      const newNodes = p.nodes.map((n) => updatedNodesMap.get(n.id) || n)
+      return { ...p, nodes: newNodes }
+    })
+
+    const updatedDoc: DocumentModel = {
+      ...document,
+      pages: updatedPages,
+      updatedAt: Date.now(),
+    }
+
+    historyManager.push(updatedDoc, `Align ${alignment}`)
+    set({
+      document: updatedDoc,
       canUndo: historyManager.canUndo(),
       canRedo: historyManager.canRedo(),
       saveStatus: 'unsaved',
