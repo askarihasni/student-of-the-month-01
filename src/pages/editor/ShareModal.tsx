@@ -37,7 +37,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
         id: c.id,
         name: c.user?.name || 'Collaborator',
         email: c.user?.email || '',
-        avatar: c.user?.avatarUrl || '/profile-pic.jpg',
+        avatar: c.user?.avatarUrl || '/avatar.jpg',
         role: c.role === 'OWNER' ? 'Owner' : c.role === 'EDITOR' ? 'Can edit' : 'Can view',
         isOwner: c.isOwner,
       }))

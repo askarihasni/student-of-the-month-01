@@ -14,13 +14,13 @@ async function seed() {
     where: { email },
     update: {
       name: 'Askari Hasni',
-      avatarUrl: '/profile-pic.jpg',
+      avatarUrl: '/avatar.jpg',
     },
     create: {
       email,
       name: 'Askari Hasni',
       passwordHash,
-      avatarUrl: '/profile-pic.jpg',
+      avatarUrl: '/avatar.jpg',
     },
   });
 

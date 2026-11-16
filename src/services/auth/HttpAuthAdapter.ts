@@ -16,7 +16,7 @@ export class HttpAuthAdapter implements AuthAdapter {
         id: data.user.id,
         name: data.user.name,
         email: data.user.email,
-        avatar: data.user.avatarUrl || '/profile-pic.jpg',
+        avatar: data.user.avatarUrl || '/avatar.jpg',
         plan: 'pro',
       };
     } catch (err: any) {
@@ -41,7 +41,7 @@ export class HttpAuthAdapter implements AuthAdapter {
         name,
         email,
         password,
-        avatarUrl: '/profile-pic.jpg',
+        avatarUrl: '/avatar.jpg',
       });
 
       apiClient.setToken(data.accessToken);
@@ -50,7 +50,7 @@ export class HttpAuthAdapter implements AuthAdapter {
         id: data.user.id,
         name: data.user.name,
         email: data.user.email,
-        avatar: data.user.avatarUrl || '/profile-pic.jpg',
+        avatar: data.user.avatarUrl || '/avatar.jpg',
         plan: 'pro',
       };
     } catch (err: any) {
@@ -89,7 +89,7 @@ export class HttpAuthAdapter implements AuthAdapter {
           id: data.user.id,
           name: data.user.name,
           email: data.user.email,
-          avatar: data.user.avatarUrl || '/profile-pic.jpg',
+          avatar: data.user.avatarUrl || '/avatar.jpg',
           plan: 'pro',
         };
       } catch {

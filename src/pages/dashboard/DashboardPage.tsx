@@ -368,6 +368,9 @@ export const DashboardPage: React.FC = () => {
                 src={user?.avatar || '/avatar.jpg'}
                 alt={user?.name || 'User'}
                 className="w-9 h-9 rounded-full object-cover border border-[#444444]"
+                onError={(e) => {
+                  ;(e.currentTarget as HTMLImageElement).src = '/avatar.jpg'
+                }}
               />
             </button>
 
@@ -380,6 +383,9 @@ export const DashboardPage: React.FC = () => {
                       src={user?.avatar || '/avatar.jpg'}
                       alt={user?.name || 'User'}
                       className="w-10 h-10 rounded-full object-cover border border-[#444444] shrink-0"
+                      onError={(e) => {
+                        ;(e.currentTarget as HTMLImageElement).src = '/avatar.jpg'
+                      }}
                     />
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-white text-sm truncate">{user?.name || 'Askari Hasni'}</div>

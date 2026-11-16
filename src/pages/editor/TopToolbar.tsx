@@ -280,6 +280,9 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
               src={user?.avatar || '/avatar.jpg'}
               alt="You"
               className="w-7 h-7 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-[#0D99FF]"
+              onError={(e) => {
+                ;(e.currentTarget as HTMLImageElement).src = '/avatar.jpg'
+              }}
             />
             <span className="w-2 h-2 rounded-full bg-emerald-400 absolute bottom-0 right-0 ring-1 ring-[#2C2C2C]" />
           </div>
@@ -414,6 +417,9 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
             src={user?.avatar || '/avatar.jpg'}
             alt={user?.name || 'User'}
             className="w-7 h-7 rounded-full object-cover border border-[#444444]"
+            onError={(e) => {
+              ;(e.currentTarget as HTMLImageElement).src = '/avatar.jpg'
+            }}
           />
         </button>
       </div>
