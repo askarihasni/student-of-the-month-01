@@ -84,3 +84,4 @@ export function authorizeDocument(requiredRole: Role = Role.VIEWER) {
     }
   };
 }
+

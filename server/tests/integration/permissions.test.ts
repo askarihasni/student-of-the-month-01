@@ -125,3 +125,4 @@ describe('Document RBAC & Permissions Integration Tests', () => {
     expect(checkRes.status).toBe(403);
   });
 });
+

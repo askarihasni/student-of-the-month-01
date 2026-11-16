@@ -32,3 +32,4 @@ authRouter.post('/logout', authController.logout);
 authRouter.post('/logout-all', authenticate, authController.logoutAll);
 
 authRouter.get('/me', authenticate, authController.me);
+

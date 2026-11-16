@@ -27,3 +27,4 @@ assetsRouter.delete(
   authorizeDocument(Role.EDITOR),
   assetsController.deleteAsset
 );
+

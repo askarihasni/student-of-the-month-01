@@ -36,3 +36,4 @@ versionsRouter.post(
   authorizeDocument(Role.EDITOR),
   versionsController.restoreVersion
 );
+

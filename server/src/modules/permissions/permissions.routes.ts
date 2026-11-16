@@ -37,3 +37,4 @@ permissionsRouter.delete(
   authorizeDocument(Role.OWNER),
   permissionsController.revokePermission
 );
+

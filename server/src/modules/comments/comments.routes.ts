@@ -49,3 +49,4 @@ commentsRouter.delete(
   authorizeDocument(Role.VIEWER),
   commentsController.deleteComment
 );
+

@@ -25,3 +25,4 @@ export function hashToken(token: string): string {
 export function generateRandomToken(bytes = 40): string {
   return crypto.randomBytes(bytes).toString('hex')
 }
+

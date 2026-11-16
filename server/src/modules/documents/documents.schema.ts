@@ -31,3 +31,4 @@ export type CreateDocumentInput = z.infer<typeof createDocumentSchema>;
 export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 export type SyncDocumentInput = z.infer<typeof syncDocumentSchema>;
 export type ListDocumentsQuery = z.infer<typeof listDocumentsQuerySchema>;
+

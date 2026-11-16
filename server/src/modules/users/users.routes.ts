@@ -19,3 +19,4 @@ usersRouter.get(
   validateRequest({ query: searchUsersQuerySchema }),
   usersController.searchUsers
 );
+

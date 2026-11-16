@@ -34,3 +34,4 @@ export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect()
   logger.info('PostgreSQL disconnected')
 }
+

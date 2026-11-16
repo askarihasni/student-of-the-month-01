@@ -183,3 +183,4 @@ docker compose up -d --build
 - PostgreSQL available on `localhost:5432`
 - Vectorly API available on `http://localhost:5000`
 - Swagger documentation at `http://localhost:5000/api/docs`
+

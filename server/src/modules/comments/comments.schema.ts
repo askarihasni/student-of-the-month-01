@@ -19,3 +19,4 @@ export const updateCommentSchema = z.object({
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
 export type ReplyCommentInput = z.infer<typeof replyCommentSchema>;
 export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;
+

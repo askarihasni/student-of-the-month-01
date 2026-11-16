@@ -12,3 +12,4 @@ export const updatePermissionSchema = z.object({
 
 export type InviteCollaboratorInput = z.infer<typeof inviteCollaboratorSchema>;
 export type UpdatePermissionInput = z.infer<typeof updatePermissionSchema>;
+

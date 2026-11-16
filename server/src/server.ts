@@ -12,7 +12,7 @@ collaborationGateway.initialize(httpServer);
 
 const PORT = env.PORT;
 
-const server = httpServer.listen(PORT, () => {
+const server = httpServer.listen(PORT, '0.0.0.0', () => {
   logger.info(`Vectorly API Server started running on http://localhost:${PORT}`);
   logger.info(`Swagger API Documentation available at http://localhost:${PORT}/api/docs`);
   logger.info(`Health check active at http://localhost:${PORT}/healthz`);
@@ -43,3 +43,4 @@ const handleShutdown = async (signal: string) => {
 
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 process.on('SIGINT', () => handleShutdown('SIGINT'));
+

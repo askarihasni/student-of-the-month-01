@@ -33,6 +33,10 @@ export function useCollaboration(documentId?: string, activePageId?: string) {
       socket.emit('join-document', { documentId });
     });
 
+    socket.on('connect_error', () => {
+      // Gracefully handle connection error when offline
+    });
+
     socket.on('room-peers', (data: { peers: PeerCursor[] }) => {
       const map = new Map<string, PeerCursor>();
       data.peers.forEach((p) => map.set(p.socketId, p));
@@ -131,3 +135,4 @@ export function useCollaboration(documentId?: string, activePageId?: string) {
     broadcastDocumentChange,
   };
 }
+

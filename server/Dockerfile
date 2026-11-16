@@ -40,3 +40,4 @@ RUN mkdir -p /app/uploads/exports
 EXPOSE 5000
 
 CMD ["node", "dist/server.js"]
+

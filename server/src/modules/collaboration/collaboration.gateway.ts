@@ -228,3 +228,4 @@ export class CollaborationGateway {
 }
 
 export const collaborationGateway = new CollaborationGateway();
+

@@ -65,3 +65,4 @@ documentsRouter.patch(
   validateRequest({ body: syncDocumentSchema }),
   documentsController.syncDocument
 );
+

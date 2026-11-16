@@ -10,3 +10,4 @@ export const searchUsersQuerySchema = z.object({
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
