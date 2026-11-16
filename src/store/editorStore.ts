@@ -9,6 +9,7 @@ import type { AlignmentGuide } from '../editor/transforms/SnapEngine'
 import { HistoryManager } from '../editor/history/HistoryManager'
 import { NodeUtils } from '../editor/model/nodeUtils'
 import { generateId, createGroup } from '../editor/model/factory'
+import { normalizeDocument } from '../editor/model/normalizeDocument'
 import { documentRepository } from '../services/repositories/LocalDevelopmentDocumentRepository'
 
 interface EditorState {
@@ -111,11 +112,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   canRedo: false,
 
   setDocument: (doc: DocumentModel) => {
+    const cleanDoc = normalizeDocument(doc)
     historyManager.clear()
-    historyManager.push(doc, 'Initial State')
+    historyManager.push(cleanDoc, 'Initial State')
     set({
-      document: doc,
-      activePageId: doc.activePageId || doc.pages[0]?.id || '',
+      document: cleanDoc,
+      activePageId: cleanDoc.activePageId || cleanDoc.pages[0]?.id || '',
       selectedNodeIds: [],
       hoverNodeId: null,
       activeTextEditingId: null,

@@ -6,6 +6,7 @@ import { useEditorStore } from '../../store/editorStore'
 import { ShapeRenderer } from '../../editor/rendering/ShapeRenderer'
 import { NodeUtils } from '../../editor/model/nodeUtils'
 import { apiClient } from '../../services/api/apiClient'
+import type { DesignNode } from '../../types/document'
 
 export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -33,7 +34,12 @@ export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
   const handleExportPng = () => {
     if (!document || !activePage) return
 
-    const nodes = activePage.nodes
+    const rawNodes = activePage.nodes
+    const nodes: DesignNode[] = Array.isArray(rawNodes)
+      ? (rawNodes as DesignNode[])
+      : rawNodes && typeof rawNodes === 'object'
+      ? (Object.values(rawNodes) as DesignNode[])
+      : []
     if (nodes.length === 0) {
       alert('Cannot export an empty canvas. Please add some shapes first.')
       return
@@ -192,7 +198,13 @@ export const ExportModal: React.FC<{ isOpen: boolean; onClose: () => void }> = (
           </div>
           <div className="flex justify-between">
             <span>Objects:</span>
-            <span className="text-zinc-200">{activePage?.nodes.length || 0}</span>
+            <span className="text-zinc-200">
+              {Array.isArray(activePage?.nodes)
+                ? activePage.nodes.length
+                : activePage?.nodes && typeof activePage.nodes === 'object'
+                ? Object.keys(activePage.nodes).length
+                : 0}
+            </span>
           </div>
         </div>
 

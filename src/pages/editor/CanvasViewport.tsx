@@ -53,7 +53,12 @@ export const CanvasViewport: React.FC = () => {
 
   const activePage =
     document?.pages.find((p) => p.id === activePageId) || document?.pages[0]
-  const nodes = activePage?.nodes || []
+  const rawNodes = activePage?.nodes
+  const nodes: DesignNode[] = Array.isArray(rawNodes)
+    ? rawNodes
+    : rawNodes && typeof rawNodes === 'object'
+    ? Object.values(rawNodes)
+    : []
 
   // Real-time peer collaboration
   const { peers, sendCursorMove } = useCollaboration(document?.id, activePageId)

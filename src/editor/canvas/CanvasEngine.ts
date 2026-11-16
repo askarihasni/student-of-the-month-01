@@ -118,7 +118,12 @@ export class CanvasEngine {
     GridRenderer.render(ctx, width, height, viewport, isDarkTheme)
 
     // 4. Render Document Nodes
-    const nodes = activePage?.nodes || []
+    const rawNodes = activePage?.nodes
+    const nodes: DesignNode[] = Array.isArray(rawNodes)
+      ? (rawNodes as DesignNode[])
+      : rawNodes && typeof rawNodes === 'object'
+      ? (Object.values(rawNodes) as DesignNode[])
+      : []
     for (const node of nodes) {
       ShapeRenderer.renderNode(ctx, node)
     }

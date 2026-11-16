@@ -88,7 +88,12 @@ export const LeftSidebar: React.FC = () => {
   }
 
   // Display layers in reverse z-order (topmost on top of list)
-  const allNodes = activePage?.nodes || []
+  const rawNodes = activePage?.nodes
+  const allNodes: DesignNode[] = Array.isArray(rawNodes)
+    ? rawNodes
+    : rawNodes && typeof rawNodes === 'object'
+    ? Object.values(rawNodes)
+    : []
   const reversedNodes = [...allNodes].reverse()
   const filteredNodes = searchLayer
     ? reversedNodes.filter((n) => n.name.toLowerCase().includes(searchLayer.toLowerCase()))

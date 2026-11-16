@@ -1,6 +1,7 @@
 import type { DocumentRepository } from './DocumentRepository';
 import type { DocumentModel, ProjectMetadata, DocumentVersion } from '../../types/document';
 import { apiClient } from '../api/apiClient';
+import { normalizeDocument } from '../../editor/model/normalizeDocument';
 
 export class HttpDocumentRepository implements DocumentRepository {
   async getAll(filter: string = 'recent', query?: string): Promise<ProjectMetadata[]> {
@@ -24,19 +25,15 @@ export class HttpDocumentRepository implements DocumentRepository {
   async getById(id: string): Promise<DocumentModel | null> {
     try {
       const data = await apiClient.get<{ document: any }>(`/documents/${id}`);
-      const rawData = data.document.data;
+      const rawData = data.document.data || {};
 
-      // Ensure proper DocumentModel shape
-      return {
+      return normalizeDocument({
+        ...rawData,
         id: data.document.id,
         name: data.document.name,
-        createdAt: typeof rawData.createdAt === 'string' ? new Date(rawData.createdAt).getTime() : rawData.createdAt,
-        updatedAt: typeof rawData.updatedAt === 'string' ? new Date(rawData.updatedAt).getTime() : rawData.updatedAt,
         version: data.document.version,
-        pages: rawData.pages || [],
-        activePageId: rawData.activePageId || rawData.pages?.[0]?.id || 'page_1',
-        thumbnail: data.document.thumbnailUrl || undefined,
-      };
+        thumbnail: data.document.thumbnailUrl || rawData.thumbnail,
+      });
     } catch (err: any) {
       if (err.status === 404) return null;
       throw err;

@@ -158,7 +158,10 @@ async function seed() {
         name: 'Crypto Wallet Mobile App',
         ownerId: user.id,
         version: 1,
-        data: doc1Data as any,
+        data: {
+          ...doc1Data,
+          pages: doc1Data.pages.map((p) => ({ ...p, nodes: Object.values(p.nodes) })),
+        } as any,
         permissions: {
           create: {
             userId: user.id,
@@ -281,7 +284,10 @@ async function seed() {
         name: 'Design System Hero & Components',
         ownerId: user.id,
         version: 1,
-        data: doc2Data as any,
+        data: {
+          ...doc2Data,
+          pages: doc2Data.pages.map((p) => ({ ...p, nodes: Object.values(p.nodes) })),
+        } as any,
         permissions: {
           create: {
             userId: user.id,
@@ -378,7 +384,10 @@ async function seed() {
         name: 'Brand Styleguide & Icons',
         ownerId: user.id,
         version: 1,
-        data: doc3Data as any,
+        data: {
+          ...doc3Data,
+          pages: doc3Data.pages.map((p) => ({ ...p, nodes: Object.values(p.nodes) })),
+        } as any,
         permissions: {
           create: {
             userId: user.id,

@@ -53,8 +53,15 @@ export const RightSidebar: React.FC = () => {
   const activePage =
     document?.pages.find((p) => p.id === activePageId) || document?.pages[0]
 
+  const rawNodes = activePage?.nodes
+  const pageNodes: DesignNode[] = Array.isArray(rawNodes)
+    ? rawNodes
+    : rawNodes && typeof rawNodes === 'object'
+    ? Object.values(rawNodes)
+    : []
+
   const selectedNodes =
-    activePage?.nodes.filter((n) => selectedNodeIds.includes(n.id)) || []
+    pageNodes.filter((n) => selectedNodeIds.includes(n.id)) || []
 
   if (isCollapsed) {
     return (
@@ -125,7 +132,7 @@ export const RightSidebar: React.FC = () => {
             <div className="space-y-1.5 text-[#B3B3B3] text-[11px] bg-[#1E1E1E] p-2.5 rounded-lg border border-[#383838]">
               <div className="flex justify-between">
                 <span className="text-[#7E7E7E]">Layers on Page:</span>
-                <span className="text-white font-medium">{activePage?.nodes.length || 0}</span>
+                <span className="text-white font-medium">{pageNodes.length}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#7E7E7E]">Total Pages:</span>

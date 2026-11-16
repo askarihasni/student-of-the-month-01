@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useEditorStore } from '../../store/editorStore'
 import { NodeUtils } from '../../editor/model/nodeUtils'
+import type { DesignNode } from '../../types/document'
 
 export const FloatingContextToolbar: React.FC = () => {
   const {
@@ -28,8 +29,14 @@ export const FloatingContextToolbar: React.FC = () => {
 
   const activePage =
     document?.pages.find((p) => p.id === activePageId) || document?.pages[0]
+  const rawNodes = activePage?.nodes
+  const pageNodes: DesignNode[] = Array.isArray(rawNodes)
+    ? (rawNodes as DesignNode[])
+    : rawNodes && typeof rawNodes === 'object'
+    ? (Object.values(rawNodes) as DesignNode[])
+    : []
   const selectedNodes =
-    activePage?.nodes.filter((n) => selectedNodeIds.includes(n.id)) || []
+    pageNodes.filter((n) => selectedNodeIds.includes(n.id)) || []
 
   if (selectedNodes.length === 0) return null
 
