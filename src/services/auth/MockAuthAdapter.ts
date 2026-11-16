@@ -146,3 +146,4 @@ export class MockAuthAdapter implements AuthAdapter {
 }
 
 export const authAdapter = new MockAuthAdapter()
+

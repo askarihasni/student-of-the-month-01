@@ -36,8 +36,8 @@ export const LoginView: React.FC = () => {
 
   const handleDemoSignIn = async () => {
     setEmail('designer@minifigma.io')
-    setPassword('figma123')
-    const success = await login('designer@minifigma.io', 'figma123')
+    setPassword('password123')
+    const success = await login('designer@minifigma.io', 'password123')
     if (success) {
       setScreen('dashboard')
     }
@@ -140,3 +140,4 @@ export const LoginView: React.FC = () => {
     </div>
   )
 }
+

@@ -62,16 +62,16 @@ export const Modal: React.FC<ModalProps> = ({
       onCancel={handleCancel}
       onClick={handleClick}
       aria-labelledby="modal-dialog-title"
-      className={`fixed inset-0 z-50 p-0 m-auto bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-xl shadow-2xl backdrop:bg-black/65 backdrop:backdrop-blur-sm w-full ${maxWidth} open:animate-in open:fade-in open:zoom-in-95`}
+      className={`fixed inset-0 z-50 p-0 m-auto bg-[#242424] border border-[#383838] text-white rounded-xl shadow-2xl backdrop:bg-black/70 backdrop:backdrop-blur-sm w-full ${maxWidth} open:animate-in open:fade-in open:zoom-in-95 duration-150`}
     >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-        <h2 id="modal-dialog-title" className="text-base font-semibold text-zinc-100">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#383838]">
+        <h2 id="modal-dialog-title" className="text-sm font-semibold text-white">
           {title}
         </h2>
         <button
           type="button"
           onClick={onClose}
-          className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="text-[#7E7E7E] hover:text-white p-1 rounded-md hover:bg-[#383838] transition-colors focus:outline-none focus:ring-1 focus:ring-[#0D99FF]"
           aria-label="Close dialog"
         >
           <X className="w-4 h-4" />
@@ -81,3 +81,4 @@ export const Modal: React.FC<ModalProps> = ({
     </dialog>
   )
 }
+

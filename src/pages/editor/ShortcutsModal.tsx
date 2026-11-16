@@ -78,3 +78,4 @@ export const ShortcutsModal: React.FC<{ isOpen: boolean; onClose: () => void }> 
     </Modal>
   )
 }
+

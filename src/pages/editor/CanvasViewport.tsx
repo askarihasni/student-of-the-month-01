@@ -19,6 +19,7 @@ import {
   generateId,
 } from '../../editor/model/factory'
 import { useEditorStore } from '../../store/editorStore'
+import { FloatingContextToolbar } from './FloatingContextToolbar'
 
 export const CanvasViewport: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -610,6 +611,9 @@ export const CanvasViewport: React.FC = () => {
         onContextMenu={(e) => e.preventDefault()}
         className="block w-full h-full touch-none"
       />
+
+      {/* Floating contextual toolbar on selection */}
+      <FloatingContextToolbar />
 
       {/* Floating finish button for Pen tool */}
       {activeTool === 'pen' && penPoints.length > 0 && (

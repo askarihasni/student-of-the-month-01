@@ -135,3 +135,4 @@ export const RegisterView: React.FC = () => {
     </div>
   )
 }
+

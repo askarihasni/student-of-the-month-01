@@ -312,3 +312,4 @@ export function createDefaultDocument(name = 'Untitled Design'): DocumentModel {
     activePageId: pageId,
   }
 }
+

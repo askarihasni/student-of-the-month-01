@@ -114,3 +114,4 @@ export class HistoryManager {
     this.batchInitialEntry = null
   }
 }
+

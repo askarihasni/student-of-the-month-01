@@ -1,35 +1,44 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
-  ChevronDown,
   Circle,
+  Cloud,
+  CloudCheck,
   Download,
-  Eye,
+  Frame,
   Hand,
   History,
-  Layers,
+  Image as ImageIcon,
+  MessageSquare,
   Minus,
-  MousePointer,
+  MousePointer2,
   PenTool,
   Plus,
   Redo2,
+  Share2,
   Square,
   Type,
   Undo2,
-  Maximize2,
-  MinusCircle,
-  Image as ImageIcon,
+  ChevronDown,
 } from 'lucide-react'
 import type { EditorTool } from '../../types/document'
 import { createImage } from '../../editor/model/factory'
 import { useEditorStore } from '../../store/editorStore'
 import { useUIStore } from '../../store/uiStore'
+import { useAuthStore } from '../../store/authStore'
 import { Tooltip } from '../../components/ui/Tooltip'
-import { Button } from '../../components/ui/Button'
+import { FigmaLogo } from '../../components/ui/FigmaLogo'
 
-export const TopToolbar: React.FC<{
+export interface TopToolbarProps {
   onOpenVersionHistory: () => void
   onExport: () => void
-}> = ({ onOpenVersionHistory, onExport }) => {
+  onOpenShare: () => void
+}
+
+export const TopToolbar: React.FC<TopToolbarProps> = ({
+  onOpenVersionHistory,
+  onExport,
+  onOpenShare,
+}) => {
   const {
     document,
     activeTool,
@@ -46,7 +55,29 @@ export const TopToolbar: React.FC<{
     addNode,
   } = useEditorStore()
 
-  const imageInputRef = React.useRef<HTMLInputElement>(null)
+  const { closeDocument } = useUIStore()
+  const { user } = useAuthStore()
+
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [titleInput, setTitleInput] = useState(document?.name || 'Untitled Design')
+  const [zoomDropdownOpen, setZoomDropdownOpen] = useState(false)
+
+  const imageInputRef = useRef<HTMLInputElement>(null)
+
+  const handleTitleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (document && titleInput.trim()) {
+      useEditorStore.setState((state) => {
+        if (!state.document) return state
+        return {
+          document: { ...state.document, name: titleInput.trim() },
+          saveStatus: 'unsaved',
+        }
+      })
+      useEditorStore.getState().saveDocumentNow()
+    }
+    setIsEditingTitle(false)
+  }
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -75,31 +106,16 @@ export const TopToolbar: React.FC<{
     reader.readAsDataURL(file)
   }
 
-  const { closeDocument } = useUIStore()
-
-  const [isEditingTitle, setIsEditingTitle] = useState(false)
-  const [titleInput, setTitleInput] = useState(document?.name || 'Untitled')
-
-  const handleTitleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (document && titleInput.trim()) {
-      useEditorStore.setState((state) => {
-        if (!state.document) return state
-        return {
-          document: { ...state.document, name: titleInput.trim() },
-          saveStatus: 'unsaved',
-        }
-      })
-      useEditorStore.getState().saveDocumentNow()
-    }
-    setIsEditingTitle(false)
-  }
-
   const zoomPercent = Math.round(viewport.zoom * 100)
 
-  const tools: { id: EditorTool; label: string; shortcut: string; icon: React.ReactNode }[] = [
-    { id: 'select', label: 'Move / Select', shortcut: 'V', icon: <MousePointer className="w-4 h-4" /> },
-    { id: 'frame', label: 'Frame', shortcut: 'F', icon: <Layers className="w-4 h-4" /> },
+  const primaryTools: {
+    id: EditorTool
+    label: string
+    shortcut: string
+    icon: React.ReactNode
+  }[] = [
+    { id: 'select', label: 'Move / Selection', shortcut: 'V', icon: <MousePointer2 className="w-4 h-4" /> },
+    { id: 'frame', label: 'Frame', shortcut: 'F', icon: <Frame className="w-4 h-4" /> },
     { id: 'rectangle', label: 'Rectangle', shortcut: 'R', icon: <Square className="w-4 h-4" /> },
     { id: 'ellipse', label: 'Ellipse', shortcut: 'O', icon: <Circle className="w-4 h-4" /> },
     { id: 'line', label: 'Line', shortcut: 'L', icon: <Minus className="w-4 h-4" /> },
@@ -109,18 +125,21 @@ export const TopToolbar: React.FC<{
   ]
 
   return (
-    <header className="h-12 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between px-3 text-zinc-200 select-none z-30">
-      {/* Left: Back button & Document Title */}
+    <header className="h-11 bg-[#2C2C2C] border-b border-[#383838] flex items-center justify-between px-3 text-[#B3B3B3] select-none z-30 shrink-0">
+      {/* Left: Application Logo, Back Button & Editable Document Title */}
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={closeDocument}
-          className="w-7 h-7 rounded-md bg-blue-600 hover:bg-blue-500 flex items-center justify-center text-white shadow transition-colors"
-          title="Back to Dashboard"
-          aria-label="Back to Dashboard"
+          className="flex items-center gap-1.5 p-1 rounded hover:bg-[#383838] text-white transition-colors focus:outline-none"
+          title="Back to Files Dashboard"
+          aria-label="Back to Files Dashboard"
         >
-          <Layers className="w-4 h-4" />
+          <FigmaLogo size={14} showWordmark={false} />
+          <ChevronDown className="w-3.5 h-3.5 text-[#7E7E7E]" />
         </button>
+
+        <div className="w-[1px] h-4 bg-[#383838] hidden sm:block" />
 
         <div className="flex items-center gap-2">
           {isEditingTitle ? (
@@ -130,7 +149,7 @@ export const TopToolbar: React.FC<{
                 value={titleInput}
                 onChange={(e) => setTitleInput(e.target.value)}
                 onBlur={handleTitleSubmit}
-                className="bg-zinc-800 text-xs text-white px-2 py-0.5 rounded border border-blue-500 focus:outline-none"
+                className="bg-[#1E1E1E] text-xs text-white px-2 py-0.5 rounded border border-[#0D99FF] focus:outline-none font-medium"
                 autoFocus
               />
             </form>
@@ -138,44 +157,37 @@ export const TopToolbar: React.FC<{
             <button
               type="button"
               onClick={() => {
-                setTitleInput(document?.name || 'Untitled')
+                setTitleInput(document?.name || 'Untitled Design')
                 setIsEditingTitle(true)
               }}
-              className="text-xs font-semibold text-zinc-100 hover:bg-zinc-800 px-2 py-1 rounded transition-colors truncate max-w-[160px] sm:max-w-xs"
-              title="Click to rename"
+              className="text-xs font-semibold text-white hover:bg-[#383838] px-2 py-1 rounded transition-colors truncate max-w-[140px] sm:max-w-xs flex items-center gap-1.5"
+              title="Click to rename document"
             >
-              {document?.name || 'Untitled Design'}
+              <span>{document?.name || 'Untitled Design'}</span>
+              <ChevronDown className="w-3 h-3 text-[#7E7E7E]" />
             </button>
           )}
 
-          {/* Save Status Indicator */}
-          <span className="text-[11px] flex items-center gap-1.5 px-2 py-0.5 rounded text-zinc-400">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                saveStatus === 'saved'
-                  ? 'bg-emerald-400'
-                  : saveStatus === 'saving'
-                  ? 'bg-amber-400 animate-pulse'
-                  : 'bg-zinc-500'
-              }`}
-            />
+          {/* Cloud Save status indicator */}
+          <div className="hidden lg:flex items-center gap-1 text-[11px] text-[#7E7E7E]">
+            <Cloud className="w-3.5 h-3.5 text-emerald-400" />
             <span className="capitalize">{saveStatus}</span>
-          </span>
+          </div>
         </div>
       </div>
 
-      {/* Center: Tools Palette & Undo/Redo */}
-      <div className="flex items-center gap-1 bg-zinc-950/70 border border-zinc-800 p-0.5 rounded-lg">
+      {/* Center: Figma-style Tool Palette */}
+      <div className="flex items-center gap-0.5 bg-[#1E1E1E] border border-[#383838] p-0.5 rounded-lg shadow-inner">
         {/* Undo / Redo */}
         <Tooltip content="Undo" shortcut="Ctrl+Z">
           <button
             type="button"
             onClick={undo}
             disabled={!canUndo}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent"
+            className="p-1.5 rounded hover:bg-[#383838] text-[#B3B3B3] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             aria-label="Undo"
           >
-            <Undo2 className="w-4 h-4" />
+            <Undo2 className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
 
@@ -184,27 +196,27 @@ export const TopToolbar: React.FC<{
             type="button"
             onClick={redo}
             disabled={!canRedo}
-            className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent"
+            className="p-1.5 rounded hover:bg-[#383838] text-[#B3B3B3] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
             aria-label="Redo"
           >
-            <Redo2 className="w-4 h-4" />
+            <Redo2 className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
 
-        <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
+        <div className="w-[1px] h-4 bg-[#383838] mx-0.5" />
 
-        {/* Tools list */}
-        {tools.map((t) => {
+        {/* Primary tools */}
+        {primaryTools.map((t) => {
           const isActive = activeTool === t.id
           return (
             <Tooltip key={t.id} content={t.label} shortcut={t.shortcut}>
               <button
                 type="button"
                 onClick={() => setActiveTool(t.id)}
-                className={`p-1.5 rounded transition-colors ${
+                className={`p-1.5 rounded transition-all ${
                   isActive
-                    ? 'bg-blue-600 text-white font-medium shadow-sm'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                    ? 'bg-[#0D99FF] text-white shadow-sm font-semibold'
+                    : 'text-[#B3B3B3] hover:text-white hover:bg-[#383838]'
                 }`}
                 aria-label={t.label}
               >
@@ -214,6 +226,7 @@ export const TopToolbar: React.FC<{
           )
         })}
 
+        {/* Insert Image tool */}
         <input
           type="file"
           ref={imageInputRef}
@@ -221,62 +234,176 @@ export const TopToolbar: React.FC<{
           accept="image/png,image/jpeg,image/svg+xml,image/webp"
           className="hidden"
         />
-
-        <Tooltip content="Insert Image">
+        <Tooltip content="Insert Image" shortcut="Img">
           <button
             type="button"
             onClick={() => imageInputRef.current?.click()}
-            className="p-1.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded text-[#B3B3B3] hover:text-white hover:bg-[#383838] transition-colors"
             aria-label="Insert Image"
           >
-            <ImageIcon className="w-4 h-4" />
+            <ImageIcon className="w-3.5 h-3.5" />
+          </button>
+        </Tooltip>
+
+        {/* Comments placeholder */}
+        <Tooltip content="Comments (C)" shortcut="C">
+          <button
+            type="button"
+            className="p-1.5 rounded text-[#7E7E7E] hover:text-white hover:bg-[#383838] transition-colors"
+            aria-label="Comments"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
           </button>
         </Tooltip>
       </div>
 
-      {/* Right: Zoom controls, Version History, Export */}
+      {/* Right: Collaborators, Share, Export, Zoom & Profile */}
       <div className="flex items-center gap-2">
-        {/* Zoom controls */}
-        <div className="flex items-center bg-zinc-950/70 border border-zinc-800 rounded-lg text-xs px-1.5 py-0.5">
-          <button
-            type="button"
-            onClick={() => zoomAt({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, 0.8)}
-            className="p-1 text-zinc-400 hover:text-white"
-            title="Zoom Out (Ctrl -)"
-            aria-label="Zoom Out"
-          >
-            <Minus className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={resetZoom}
-            className="px-1.5 font-mono text-[11px] text-zinc-200 hover:text-white"
-            title="Reset Zoom to 100%"
-          >
-            {zoomPercent}%
-          </button>
-
-          <button
-            type="button"
-            onClick={() => zoomAt({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, 1.25)}
-            className="p-1 text-zinc-400 hover:text-white"
-            title="Zoom In (Ctrl +)"
-            aria-label="Zoom In"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
+        {/* Collaborators overlapping avatars */}
+        <div className="hidden md:flex items-center -space-x-1.5 mr-1">
+          <div className="relative group cursor-pointer" title="Sarah Chen (Online)">
+            <img
+              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80"
+              alt="Sarah"
+              className="w-6 h-6 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-emerald-500"
+            />
+          </div>
+          <div className="relative group cursor-pointer" title="David Kim (Online)">
+            <img
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80"
+              alt="David"
+              className="w-6 h-6 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-emerald-500"
+            />
+          </div>
+          <div className="relative group cursor-pointer" title={user?.name || 'You (Active)'}>
+            <img
+              src={
+                user?.avatar ||
+                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80'
+              }
+              alt="You"
+              className="w-6 h-6 rounded-full object-cover border-2 border-[#2C2C2C] ring-1 ring-[#0D99FF]"
+            />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 absolute bottom-0 right-0 ring-1 ring-[#2C2C2C]" />
+          </div>
         </div>
 
-        <Tooltip content="Version Snapshots">
-          <Button variant="ghost" size="sm" icon={<History className="w-3.5 h-3.5" />} onClick={onOpenVersionHistory}>
-            History
-          </Button>
+        {/* Share Button (Figma signature primary action) */}
+        <button
+          type="button"
+          onClick={onOpenShare}
+          className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#0D99FF] hover:bg-[#0C8CE9] text-white text-xs font-semibold shadow-sm transition-colors active:scale-95"
+        >
+          <Share2 className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Share</span>
+        </button>
+
+        {/* Export Button */}
+        <button
+          type="button"
+          onClick={onExport}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#383838] hover:bg-[#444444] text-white text-xs font-medium border border-[#444444] transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Export</span>
+        </button>
+
+        {/* Version History Button */}
+        <Tooltip content="Snapshots & Version History">
+          <button
+            type="button"
+            onClick={onOpenVersionHistory}
+            className="p-1.5 rounded hover:bg-[#383838] text-[#B3B3B3] hover:text-white transition-colors"
+            aria-label="Version history"
+          >
+            <History className="w-3.5 h-3.5" />
+          </button>
         </Tooltip>
 
-        <Button variant="primary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={onExport}>
-          Export
-        </Button>
+        {/* Zoom Controls */}
+        <div className="relative">
+          <div className="flex items-center bg-[#1E1E1E] border border-[#383838] rounded text-xs px-1.5 py-0.5">
+            <button
+              type="button"
+              onClick={() => zoomAt({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, 0.8)}
+              className="p-1 text-[#7E7E7E] hover:text-white transition-colors"
+              title="Zoom Out"
+              aria-label="Zoom Out"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setZoomDropdownOpen(!zoomDropdownOpen)}
+              className="px-1.5 font-mono text-[11px] text-white hover:text-[#0D99FF] flex items-center gap-1 transition-colors"
+            >
+              <span>{zoomPercent}%</span>
+              <ChevronDown className="w-2.5 h-2.5 text-[#7E7E7E]" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => zoomAt({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, 1.25)}
+              className="p-1 text-[#7E7E7E] hover:text-white transition-colors"
+              title="Zoom In"
+              aria-label="Zoom In"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
+          </div>
+
+          {zoomDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setZoomDropdownOpen(false)} />
+              <div className="absolute right-0 mt-1 w-36 bg-[#2C2C2C] border border-[#383838] rounded-lg shadow-2xl z-50 py-1 text-xs text-[#B3B3B3]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetZoom()
+                    setZoomDropdownOpen(false)
+                  }}
+                  className="w-full px-3 py-1.5 text-left hover:bg-[#383838] hover:text-white flex justify-between"
+                >
+                  <span>Zoom to 100%</span>
+                  <span className="text-[10px] text-[#7E7E7E]">Shift+0</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    fitToScreen(window.innerWidth, window.innerHeight)
+                    setZoomDropdownOpen(false)
+                  }}
+                  className="w-full px-3 py-1.5 text-left hover:bg-[#383838] hover:text-white flex justify-between"
+                >
+                  <span>Zoom to fit</span>
+                  <span className="text-[10px] text-[#7E7E7E]">Shift+1</span>
+                </button>
+                <div className="border-t border-[#383838] my-1" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    useEditorStore.setState((s) => ({ viewport: { ...s.viewport, zoom: 0.5 } }))
+                    setZoomDropdownOpen(false)
+                  }}
+                  className="w-full px-3 py-1.5 text-left hover:bg-[#383838] hover:text-white"
+                >
+                  50%
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    useEditorStore.setState((s) => ({ viewport: { ...s.viewport, zoom: 2.0 } }))
+                    setZoomDropdownOpen(false)
+                  }}
+                  className="w-full px-3 py-1.5 text-left hover:bg-[#383838] hover:text-white"
+                >
+                  200%
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   )

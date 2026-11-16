@@ -155,3 +155,4 @@ describe('Bezier curve calculations', () => {
     expect(mid.y).toBeCloseTo(75)
   })
 })
+

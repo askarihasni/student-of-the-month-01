@@ -76,3 +76,4 @@ export class GridRenderer {
     ctx.restore()
   }
 }
+

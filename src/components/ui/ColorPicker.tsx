@@ -7,17 +7,18 @@ export interface ColorPickerProps {
   showAlpha?: boolean
 }
 
-const PRESET_SWATCHES = [
+const FIGMA_SWATCHES = [
   '#000000',
   '#FFFFFF',
-  '#3B82F6', // Blue
-  '#10B981', // Emerald
+  '#F24E1E', // Figma Red-Orange
+  '#FF7262', // Figma Coral
+  '#A259FF', // Figma Purple
+  '#1ABCFE', // Figma Sky Blue
+  '#0ACF83', // Figma Green
+  '#0D99FF', // Figma Focus Blue
   '#F59E0B', // Amber
-  '#EF4444', // Red
-  '#8B5CF6', // Purple
   '#EC4899', // Pink
-  '#18181B', // Dark Zinc
-  '#64748B', // Slate
+  '#2C2C2C', // Dark Slate
   'transparent',
 ]
 
@@ -39,27 +40,29 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 
   return (
     <div className="relative">
-      {label && <label className="block text-[11px] text-zinc-400 mb-1">{label}</label>}
-      <div className="flex items-center gap-2">
+      {label && <label className="block text-[11px] font-medium text-[#8C8C8C] mb-1">{label}</label>}
+      <div className="flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-6 h-6 rounded border border-zinc-700 shadow-inner flex items-center justify-center shrink-0 overflow-hidden focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-6 h-6 rounded-[3px] border border-[#444444] shadow-inner flex items-center justify-center shrink-0 overflow-hidden hover:border-[#0D99FF] transition-colors focus:outline-none focus:ring-1 focus:ring-[#0D99FF]"
           style={{
             backgroundColor: isTransparent ? 'transparent' : color,
             backgroundImage: isTransparent
-              ? 'repeating-conic-gradient(#555 0% 25%, #333 0% 50%) 50% / 8px 8px'
+              ? 'repeating-conic-gradient(#555 0% 25%, #333 0% 50%) 50% / 6px 6px'
               : undefined,
           }}
           title="Pick color"
         />
 
-        <input
-          type="text"
-          value={color.toUpperCase()}
-          onChange={handleHexChange}
-          className="w-24 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs px-2 py-1 rounded font-mono uppercase focus:outline-none focus:border-blue-500"
-        />
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={color.toUpperCase()}
+            onChange={handleHexChange}
+            className="w-full bg-[#1E1E1E] border border-[#383838] text-[#E0E0E0] text-[11px] px-2 py-1 rounded-[3px] font-mono uppercase focus:outline-none focus:border-[#0D99FF] focus:text-white"
+          />
+        </div>
 
         <input
           type="color"
@@ -70,7 +73,8 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         />
         <label
           htmlFor={`native-color-${label || 'picker'}`}
-          className="cursor-pointer text-xs text-zinc-400 hover:text-white px-1.5 py-0.5 rounded border border-zinc-800 bg-zinc-850 hover:bg-zinc-800"
+          className="cursor-pointer text-[10px] text-[#A0A0A0] hover:text-white px-1.5 py-1 rounded-[3px] border border-[#383838] bg-[#242424] hover:bg-[#2C2C2C] transition-colors shrink-0 font-medium"
+          title="Open native color picker wheel"
         >
           Wheel
         </label>
@@ -79,10 +83,10 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 mt-2 p-3 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 w-52">
-            <div className="text-[11px] font-medium text-zinc-400 mb-2">Preset Colors</div>
+          <div className="absolute left-0 mt-1.5 p-3 bg-[#242424] border border-[#383838] rounded-md shadow-2xl z-50 w-52 text-white">
+            <div className="text-[10px] uppercase font-bold tracking-wider text-[#8C8C8C] mb-2">Preset Swatches</div>
             <div className="grid grid-cols-6 gap-1.5 mb-3">
-              {PRESET_SWATCHES.map((swatch) => (
+              {FIGMA_SWATCHES.map((swatch) => (
                 <button
                   key={swatch}
                   type="button"
@@ -90,12 +94,12 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                     onChange(swatch)
                     setIsOpen(false)
                   }}
-                  className="w-6 h-6 rounded border border-zinc-700/80 hover:scale-110 transition-transform relative overflow-hidden"
+                  className="w-6 h-6 rounded-[3px] border border-[#444444] hover:scale-110 hover:border-white transition-all relative overflow-hidden"
                   style={{
                     backgroundColor: swatch === 'transparent' ? 'transparent' : swatch,
                     backgroundImage:
                       swatch === 'transparent'
-                        ? 'repeating-conic-gradient(#666 0% 25%, #333 0% 50%) 50% / 6px 6px'
+                        ? 'repeating-conic-gradient(#666 0% 25%, #333 0% 50%) 50% / 5px 5px'
                         : undefined,
                   }}
                   title={swatch}
@@ -103,16 +107,23 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
               ))}
             </div>
 
-            <div className="pt-2 border-t border-zinc-800 flex justify-between items-center">
+            <div className="pt-2 border-t border-[#383838] flex justify-between items-center text-[11px]">
               <button
                 type="button"
                 onClick={() => {
                   onChange('transparent')
                   setIsOpen(false)
                 }}
-                className="text-xs text-zinc-400 hover:text-white"
+                className="text-[#8C8C8C] hover:text-[#FF7262] transition-colors font-medium"
               >
                 Clear / Transparent
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="text-[#8C8C8C] hover:text-white transition-colors"
+              >
+                Close
               </button>
             </div>
           </div>
@@ -121,3 +132,4 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     </div>
   )
 }
+

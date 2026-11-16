@@ -12,3 +12,4 @@ export interface DocumentRepository {
   saveVersion(id: string, label: string): Promise<DocumentVersion>
   restoreVersion(id: string, versionId: string): Promise<DocumentModel>
 }
+

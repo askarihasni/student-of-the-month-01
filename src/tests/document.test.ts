@@ -50,3 +50,4 @@ describe('Document Model & Schema Validation', () => {
     expect(union).toEqual({ x: 0, y: 0, width: 150, height: 150 })
   })
 })
+

@@ -18,3 +18,4 @@ export interface AuthAdapter {
   getCurrentUser(): Promise<User | null>
   requestPasswordReset(email: string): Promise<boolean>
 }
+

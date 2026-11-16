@@ -100,3 +100,4 @@ export const ForgotPasswordView: React.FC = () => {
     </div>
   )
 }
+

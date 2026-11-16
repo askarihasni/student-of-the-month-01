@@ -71,3 +71,4 @@ export const useUIStore = create<UIState>((set) => ({
   setDashboardViewMode: (mode) => set({ dashboardViewMode: mode }),
   setDashboardSortBy: (sort) => set({ dashboardSortBy: sort }),
 }))
+

@@ -239,3 +239,4 @@ export class OverlayRenderer {
     ctx.restore()
   }
 }
+

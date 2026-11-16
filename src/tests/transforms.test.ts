@@ -117,3 +117,4 @@ describe('HistoryManager', () => {
     expect(redone?.name).toBe('Doc 3')
   })
 })
+

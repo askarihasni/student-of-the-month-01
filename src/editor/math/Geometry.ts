@@ -245,3 +245,4 @@ export class Geometry {
     return Math.max(min, Math.min(max, val))
   }
 }
+

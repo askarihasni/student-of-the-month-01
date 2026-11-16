@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {
+  Bell,
   Clock,
+  ExternalLink,
+  FileCode,
   Folder,
   Grid,
   Layers,
@@ -8,9 +11,11 @@ import {
   LogOut,
   Plus,
   Search,
+  SlidersHorizontal,
+  Sparkles,
   Upload,
   User,
-  SlidersHorizontal,
+  Users,
 } from 'lucide-react'
 import type { ProjectMetadata, DocumentModel } from '../../types/document'
 import { documentRepository } from '../../services/repositories/LocalDevelopmentDocumentRepository'
@@ -19,6 +24,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useEditorStore } from '../../store/editorStore'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
+import { FigmaLogo } from '../../components/ui/FigmaLogo'
 import { ProjectCard } from './ProjectCard'
 import { DocumentModelSchema } from '../../schemas/document.schema'
 
@@ -116,18 +122,17 @@ export const DashboardPage: React.FC = () => {
         const validation = DocumentModelSchema.safeParse(parsed)
 
         if (!validation.success) {
-          setImportError('Invalid Mini Figma JSON document structure.')
+          setImportError('Invalid Mini Figma JSON document format.')
           return
         }
 
         const validDoc = validation.data as DocumentModel
-        // Save and open
         await documentRepository.save(validDoc)
         await loadProjects()
         setDocument(validDoc)
         openDocument(validDoc.id)
       } catch (err) {
-        setImportError('Could not parse JSON file.')
+        setImportError('Could not parse JSON document.')
       }
     }
     reader.readAsText(file)
@@ -144,30 +149,29 @@ export const DashboardPage: React.FC = () => {
     })
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    <div className="min-h-screen bg-[#181818] text-white flex flex-col font-sans select-none">
       {/* Top Header */}
-      <header className="h-14 border-b border-zinc-800/80 bg-zinc-900/50 backdrop-blur px-6 flex items-center justify-between sticky top-0 z-30">
+      <header className="h-12 border-b border-[#2C2C2C] bg-[#242424] px-5 flex items-center justify-between sticky top-0 z-30 shadow-sm">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-              <Layers className="w-5 h-5" />
-            </div>
-            <span className="font-bold text-base tracking-tight text-white">Mini Figma</span>
-          </div>
+          <FigmaLogo size={18} showWordmark={true} />
 
-          <div className="relative w-72 hidden md:block">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          {/* Search bar with Ctrl+K shortcut badge */}
+          <div className="relative w-80 hidden md:block">
+            <Search className="w-3.5 h-3.5 text-[#7E7E7E] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search files and designs..."
+              placeholder="Search files, teams, or components..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-800 text-xs rounded-lg pl-9 pr-3 py-1.5 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-[#181818] border border-[#383838] text-xs rounded-md pl-9 pr-8 py-1.5 text-white placeholder-[#7E7E7E] focus:outline-none focus:border-[#0D99FF] focus:ring-1 focus:ring-[#0D99FF]"
             />
+            <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-[#2C2C2C] text-[#7E7E7E] px-1 py-0.5 rounded text-[10px] font-mono border border-[#383838]">
+              /
+            </kbd>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <input
             type="file"
             ref={fileInputRef}
@@ -176,48 +180,48 @@ export const DashboardPage: React.FC = () => {
             className="hidden"
           />
 
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Upload className="w-3.5 h-3.5" />}
+          <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#2C2C2C] hover:bg-[#383838] text-[#B3B3B3] hover:text-white border border-[#383838] text-xs font-medium transition-colors"
           >
-            Import JSON
-          </Button>
+            <Upload className="w-3.5 h-3.5" />
+            <span>Import JSON</span>
+          </button>
 
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Plus className="w-4 h-4" />}
+          <button
+            type="button"
             onClick={() => setNewDocModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-[#0D99FF] hover:bg-[#0C8CE9] text-white text-xs font-semibold shadow-sm transition-all active:scale-95"
           >
-            Create New Design
-          </Button>
+            <Plus className="w-4 h-4" />
+            <span>Design File</span>
+          </button>
 
-          {/* User profile dropdown */}
-          <div className="relative ml-2">
+          {/* User profile avatar dropdown */}
+          <div className="relative ml-1">
             <button
               type="button"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-zinc-700 transition-all focus:outline-none"
+              className="flex items-center p-0.5 rounded-full hover:ring-2 hover:ring-[#0D99FF] transition-all focus:outline-none"
             >
               <img
                 src={user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80'}
                 alt={user?.name || 'User'}
-                className="w-7 h-7 rounded-full object-cover border border-zinc-700"
+                className="w-7 h-7 rounded-full object-cover border border-[#444444]"
               />
             </button>
 
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                <div className="absolute right-0 mt-2 w-56 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-50 py-1.5 text-xs text-zinc-300">
-                  <div className="px-4 py-2 border-b border-zinc-800">
-                    <p className="font-semibold text-white">{user?.name || 'Designer'}</p>
-                    <p className="text-[11px] text-zinc-500 truncate">{user?.email || 'designer@minifigma.io'}</p>
-                    <span className="inline-block mt-1 px-1.5 py-0.5 bg-blue-950 text-blue-400 rounded text-[10px] font-medium border border-blue-800/40">
-                      Pro Plan (Simulated)
-                    </span>
+                <div className="absolute right-0 mt-2 w-60 bg-[#2C2C2C] border border-[#383838] rounded-xl shadow-2xl z-50 py-1.5 text-xs text-[#B3B3B3]">
+                  <div className="px-4 py-2.5 border-b border-[#383838]">
+                    <div className="font-semibold text-white">{user?.name || 'Askari Hasni'}</div>
+                    <div className="text-[11px] text-[#7E7E7E] truncate">{user?.email || 'designer@minifigma.io'}</div>
+                    <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 bg-[#0D99FF]/15 text-[#0D99FF] rounded text-[10px] font-semibold border border-[#0D99FF]/30">
+                      <Sparkles className="w-3 h-3" /> Pro Workspace
+                    </div>
                   </div>
 
                   <button
@@ -226,13 +230,13 @@ export const DashboardPage: React.FC = () => {
                       setUserMenuOpen(false)
                       setScreen('auth')
                     }}
-                    className="w-full px-4 py-2 text-left hover:bg-zinc-800 flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left hover:bg-[#383838] hover:text-white flex items-center gap-2"
                   >
-                    <User className="w-3.5 h-3.5 text-zinc-400" />
-                    Switch Account / Sign In
+                    <User className="w-3.5 h-3.5 text-[#7E7E7E]" />
+                    Switch User / Account
                   </button>
 
-                  <div className="border-t border-zinc-800 my-1" />
+                  <div className="border-t border-[#383838] my-1" />
 
                   <button
                     type="button"
@@ -253,95 +257,142 @@ export const DashboardPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Workspace Layout */}
+      {/* Main Layout */}
       <div className="flex-1 flex max-w-7xl w-full mx-auto p-6 gap-8">
         {/* Left Navigation Sidebar */}
-        <aside className="w-52 shrink-0 hidden md:block">
-          <nav className="space-y-1">
+        <aside className="w-56 shrink-0 hidden md:block space-y-6">
+          <nav className="space-y-0.5">
             <button
               type="button"
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium bg-zinc-850 text-white border border-zinc-800"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold bg-[#2C2C2C] text-white border border-[#383838] shadow-sm"
             >
-              <Clock className="w-4 h-4 text-blue-400" />
-              Recent Files
+              <Clock className="w-4 h-4 text-[#0D99FF]" />
+              <span>Recents</span>
             </button>
             <button
               type="button"
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#B3B3B3] hover:text-white hover:bg-[#242424] transition-colors"
             >
-              <Folder className="w-4 h-4" />
-              All Projects
+              <Folder className="w-4 h-4 text-[#7E7E7E]" />
+              <span>Drafts</span>
+            </button>
+            <button
+              type="button"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#B3B3B3] hover:text-white hover:bg-[#242424] transition-colors"
+            >
+              <Users className="w-4 h-4 text-[#7E7E7E]" />
+              <span>Shared with me</span>
             </button>
           </nav>
 
-          <div className="mt-8 pt-6 border-t border-zinc-800/80">
-            <h4 className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-2">
-              Workspace
+          {/* Teams list */}
+          <div>
+            <h4 className="text-[11px] font-semibold text-[#7E7E7E] uppercase tracking-wider px-3 mb-2">
+              Teams
             </h4>
-            <div className="p-3 bg-zinc-900/60 rounded-xl border border-zinc-800/80 text-xs text-zinc-400 space-y-1.5">
-              <div className="flex justify-between">
-                <span>Storage:</span>
-                <span className="text-zinc-200">Local Dev</span>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-[#242424] text-xs text-[#B3B3B3] cursor-pointer">
+                <span className="w-3.5 h-3.5 rounded bg-blue-500/30 border border-blue-400 flex items-center justify-center text-[9px] font-bold text-blue-300">
+                  D
+                </span>
+                <span>Design System</span>
               </div>
-              <div className="flex justify-between">
-                <span>Total Files:</span>
-                <span className="text-zinc-200">{projects.length}</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-[#242424] text-xs text-[#B3B3B3] cursor-pointer">
+                <span className="w-3.5 h-3.5 rounded bg-purple-500/30 border border-purple-400 flex items-center justify-center text-[9px] font-bold text-purple-300">
+                  M
+                </span>
+                <span>Mobile App Team</span>
               </div>
-              <div className="flex justify-between">
-                <span>Engine:</span>
-                <span className="text-green-400 font-medium">Canvas 2D</span>
-              </div>
+            </div>
+          </div>
+
+          {/* Workspace Status Card */}
+          <div className="p-3 bg-[#242424] rounded-xl border border-[#383838] text-xs space-y-2">
+            <div className="flex items-center justify-between text-[#B3B3B3]">
+              <span className="text-[11px] text-[#7E7E7E]">Mode</span>
+              <span className="text-white font-medium">Local Dev</span>
+            </div>
+            <div className="flex items-center justify-between text-[#B3B3B3]">
+              <span className="text-[11px] text-[#7E7E7E]">Total Files</span>
+              <span className="text-white font-medium">{projects.length}</span>
+            </div>
+            <div className="flex items-center justify-between text-[#B3B3B3]">
+              <span className="text-[11px] text-[#7E7E7E]">Renderer</span>
+              <span className="text-emerald-400 font-mono text-[10px]">Canvas 2D</span>
             </div>
           </div>
         </aside>
 
-        {/* Content Area */}
+        {/* Main Content Area */}
         <main className="flex-1 min-w-0">
-          {/* Controls Bar */}
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800/80">
+          {/* Welcome & Quick Create Hero */}
+          <div className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-[#242424] via-[#242424] to-[#1E1E1E] border border-[#2E2E2E] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Recent Files</h1>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                {filteredProjects.length} document{filteredProjects.length === 1 ? '' : 's'} available
+              <h1 className="text-xl font-bold text-white tracking-tight">
+                Welcome back, {user?.name?.split(' ')[0] || 'Designer'}
+              </h1>
+              <p className="text-xs text-[#B3B3B3] mt-1">
+                Jump back into your recent vector designs or create a new blank canvas.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setNewDocModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D99FF] hover:bg-[#0C8CE9] text-white text-xs font-semibold shadow-md shadow-[#0D99FF]/20 transition-all hover:scale-102"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New Design File</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Controls Bar: Search feedback, Sort, Grid/List view */}
+          <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#2C2C2C]">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-white">Recent Files</h2>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#242424] text-[#B3B3B3] border border-[#383838]">
+                {filteredProjects.length}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5">
               {/* Sort selector */}
-              <div className="flex items-center gap-1.5 text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg">
-                <SlidersHorizontal className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1.5 text-xs text-[#B3B3B3] bg-[#242424] border border-[#383838] px-2.5 py-1 rounded-md">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#7E7E7E]" />
                 <select
                   value={dashboardSortBy}
                   onChange={(e) => setDashboardSortBy(e.target.value as 'updatedAt' | 'name')}
                   aria-label="Sort projects"
-                  className="bg-transparent text-zinc-200 text-xs focus:outline-none cursor-pointer"
+                  className="bg-transparent text-white text-xs focus:outline-none cursor-pointer"
                 >
-                  <option value="updatedAt">Last Modified</option>
-                  <option value="name">Name (A-Z)</option>
+                  <option value="updatedAt" className="bg-[#2C2C2C]">Last Modified</option>
+                  <option value="name" className="bg-[#2C2C2C]">Name (A–Z)</option>
                 </select>
               </div>
 
               {/* View switcher */}
-              <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg">
+              <div className="flex items-center bg-[#242424] border border-[#383838] p-0.5 rounded-md">
                 <button
                   type="button"
                   onClick={() => setDashboardViewMode('grid')}
-                  className={`p-1.5 rounded ${
-                    dashboardViewMode === 'grid' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
+                  className={`p-1 rounded ${
+                    dashboardViewMode === 'grid' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
                   }`}
                   aria-label="Grid view"
                 >
-                  <Grid className="w-4 h-4" />
+                  <Grid className="w-3.5 h-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setDashboardViewMode('list')}
-                  className={`p-1.5 rounded ${
-                    dashboardViewMode === 'list' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
+                  className={`p-1 rounded ${
+                    dashboardViewMode === 'list' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
                   }`}
                   aria-label="List view"
                 >
-                  <List className="w-4 h-4" />
+                  <List className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -357,19 +408,19 @@ export const DashboardPage: React.FC = () => {
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-48 bg-zinc-900/40 rounded-xl animate-pulse" />
+                <div key={i} className="h-48 bg-[#242424] rounded-xl animate-pulse" />
               ))}
             </div>
           ) : filteredProjects.length === 0 ? (
-            <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/30">
-              <div className="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mx-auto mb-3 text-zinc-400">
+            <div className="text-center py-20 border border-dashed border-[#383838] rounded-2xl bg-[#1E1E1E]/50">
+              <div className="w-12 h-12 bg-[#2C2C2C] rounded-xl flex items-center justify-center mx-auto mb-3 text-[#7E7E7E]">
                 <Folder className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-semibold text-zinc-200">No documents found</h3>
-              <p className="text-xs text-zinc-500 max-w-xs mx-auto mt-1 mb-4">
+              <h3 className="text-sm font-semibold text-white">No documents found</h3>
+              <p className="text-xs text-[#7E7E7E] max-w-xs mx-auto mt-1 mb-4">
                 {searchQuery
-                  ? `No designs matching "${searchQuery}". Clear your search to see all files.`
-                  : 'Get started by creating your first vector design document.'}
+                  ? `No designs matching "${searchQuery}". Clear your search query to see all files.`
+                  : 'Start your creative journey by creating your first vector design document.'}
               </p>
               <Button
                 variant="primary"
@@ -420,13 +471,13 @@ export const DashboardPage: React.FC = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Document Title</label>
+            <label className="block text-xs font-medium text-[#B3B3B3] mb-1.5">Document Title</label>
             <input
               type="text"
-              placeholder="e.g. Mobile App Redesign"
+              placeholder="e.g. Design System v2"
               value={newDocName}
               onChange={(e) => setNewDocName(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="w-full bg-[#181818] border border-[#383838] rounded-md px-3 py-2 text-sm text-white placeholder-[#7E7E7E] focus:outline-none focus:border-[#0D99FF]"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreateNew()
@@ -434,12 +485,12 @@ export const DashboardPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#383838]">
             <Button variant="ghost" size="sm" onClick={() => setNewDocModalOpen(false)}>
               Cancel
             </Button>
             <Button variant="primary" size="sm" onClick={handleCreateNew}>
-              Create Document
+              Create File
             </Button>
           </div>
         </div>
@@ -452,13 +503,12 @@ export const DashboardPage: React.FC = () => {
         title="Delete Document"
       >
         <div className="space-y-4">
-          <p className="text-xs text-zinc-300 leading-relaxed">
+          <p className="text-xs text-[#B3B3B3] leading-relaxed">
             Are you sure you want to permanently delete{' '}
-            <strong className="text-white">&ldquo;{targetDelete?.name}&rdquo;</strong>? This action cannot be
-            undone.
+            <strong className="text-white">&ldquo;{targetDelete?.name}&rdquo;</strong>? This file will be removed from your local workspace.
           </p>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#383838]">
             <Button variant="ghost" size="sm" onClick={() => setDeleteModalOpen(false)}>
               Keep File
             </Button>

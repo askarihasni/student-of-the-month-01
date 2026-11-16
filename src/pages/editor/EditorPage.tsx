@@ -7,6 +7,7 @@ import { BottomBar } from './BottomBar'
 import { ExportModal } from './ExportModal'
 import { VersionHistoryModal } from './VersionHistoryModal'
 import { ShortcutsModal } from './ShortcutsModal'
+import { ShareModal } from './ShareModal'
 import { useKeyboardShortcuts } from '../../editor/events/useKeyboardShortcuts'
 
 export const EditorPage: React.FC = () => {
@@ -16,13 +17,15 @@ export const EditorPage: React.FC = () => {
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false)
+  const [shareModalOpen, setShareModalOpen] = useState(false)
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-zinc-950 text-zinc-100 overflow-hidden select-none">
+    <div className="h-screen w-screen flex flex-col bg-[#1E1E1E] text-white overflow-hidden select-none font-sans">
       {/* Top Toolbar */}
       <TopToolbar
         onOpenVersionHistory={() => setHistoryModalOpen(true)}
         onExport={() => setExportModalOpen(true)}
+        onOpenShare={() => setShareModalOpen(true)}
       />
 
       {/* Main Work Area: Left Sidebar, Canvas Viewport, Right Sidebar */}
@@ -39,6 +42,7 @@ export const EditorPage: React.FC = () => {
       <ExportModal isOpen={exportModalOpen} onClose={() => setExportModalOpen(false)} />
       <VersionHistoryModal isOpen={historyModalOpen} onClose={() => setHistoryModalOpen(false)} />
       <ShortcutsModal isOpen={shortcutsModalOpen} onClose={() => setShortcutsModalOpen(false)} />
+      <ShareModal isOpen={shareModalOpen} onClose={() => setShareModalOpen(false)} />
     </div>
   )
 }

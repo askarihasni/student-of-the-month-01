@@ -432,3 +432,4 @@ export class LocalDevelopmentDocumentRepository implements DocumentRepository {
 }
 
 export const documentRepository = new LocalDevelopmentDocumentRepository()
+
