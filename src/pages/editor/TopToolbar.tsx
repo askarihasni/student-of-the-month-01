@@ -135,7 +135,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
           title="Back to Files Dashboard"
           aria-label="Back to Files Dashboard"
         >
-          <FigmaLogo size={14} showWordmark={false} />
+          <FigmaLogo size={18} showWordmark={false} />
           <ChevronDown className="w-3.5 h-3.5 text-[#7E7E7E]" />
         </button>
 
