@@ -6,11 +6,14 @@ import {
   AlignLeft,
   AlignRight,
   AlignVerticalDistributeCenter,
+  Baseline,
+  Bold,
   ChevronDown,
   ChevronRight,
   Copy,
   Eye,
   EyeOff,
+  Italic,
   Link,
   Lock,
   Minus,
@@ -22,8 +25,10 @@ import {
   RotateCw,
   Sliders,
   Sparkles,
+  Strikethrough,
   Trash2,
   Type,
+  Underline,
   Unlink,
 } from 'lucide-react'
 import type { DesignNode, RectangleNode, TextNode } from '../../types/document'
@@ -366,103 +371,290 @@ export const RightSidebar: React.FC = () => {
       </div>
 
       {/* 2. TYPOGRAPHY SECTION (If Text node) */}
-      {primaryNode.type === 'text' && (
-        <div className="pt-2 border-t border-[#383838] space-y-2.5">
-          <div
-            className="flex items-center justify-between text-[11px] font-semibold text-[#7E7E7E] uppercase tracking-wider cursor-pointer hover:text-white transition-colors"
-            onClick={() => setTypographyOpen(!typographyOpen)}
-          >
-            <div className="flex items-center gap-1">
-              {typographyOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-              <span>Typography</span>
-            </div>
-          </div>
+      {primaryNode.type === 'text' && (() => {
+        const textNode = primaryNode as TextNode
+        const isBold = textNode.fontWeight === 'bold' || textNode.fontWeight === '700' || textNode.fontWeight === '800' || textNode.fontWeight === '900'
+        const isItalic = textNode.fontStyle === 'italic'
+        const isUnderline = textNode.textDecoration === 'underline'
+        const isStrikethrough = textNode.textDecoration === 'line-through'
 
-          {typographyOpen && (
-            <div className="space-y-2.5 animate-in fade-in duration-100">
-              {/* Font family selector */}
-              <div>
-                <select
-                  value={primaryNode.fontFamily || 'Inter, sans-serif'}
-                  onChange={(e) => updateNode(primaryNode.id, { fontFamily: e.target.value })}
-                  aria-label="Font Family"
-                  className="w-full bg-[#1E1E1E] border border-[#383838] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-[#0D99FF] cursor-pointer"
-                >
-                  <option value="Inter, sans-serif">Inter</option>
-                  <option value="Roboto, sans-serif">Roboto</option>
-                  <option value="-apple-system, BlinkMacSystemFont, sans-serif">SF Pro</option>
-                  <option value="Georgia, serif">Georgia</option>
-                  <option value="ui-monospace, monospace">JetBrains Mono</option>
-                </select>
+        const presetSizes = [12, 14, 16, 20, 24, 32, 48]
+
+        return (
+          <div className="pt-2 border-t border-[#383838] space-y-2.5">
+            <div
+              className="flex items-center justify-between text-[11px] font-semibold text-[#7E7E7E] uppercase tracking-wider cursor-pointer hover:text-white transition-colors"
+              onClick={() => setTypographyOpen(!typographyOpen)}
+            >
+              <div className="flex items-center gap-1">
+                {typographyOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                <span>Typography</span>
               </div>
+            </div>
 
-              {/* Font Weight & Size */}
-              <div className="grid grid-cols-2 gap-1.5">
-                <select
-                  value={primaryNode.fontWeight || 'normal'}
-                  onChange={(e) => updateNode(primaryNode.id, { fontWeight: e.target.value })}
-                  aria-label="Font Weight"
-                  className="bg-[#1E1E1E] border border-[#383838] rounded px-2 py-1 text-xs text-white focus:outline-none cursor-pointer"
-                >
-                  <option value="normal">Regular</option>
-                  <option value="500">Medium</option>
-                  <option value="600">Semibold</option>
-                  <option value="bold">Bold</option>
-                </select>
+            {typographyOpen && (
+              <div className="space-y-3 animate-in fade-in duration-100">
+                {/* 1. Font family selector */}
+                <div>
+                  <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Font Family</label>
+                  <select
+                    value={textNode.fontFamily || 'Inter, sans-serif'}
+                    onChange={(e) => updateNode(textNode.id, { fontFamily: e.target.value })}
+                    aria-label="Font Family"
+                    className="w-full bg-[#1E1E1E] border border-[#383838] rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#0D99FF] cursor-pointer"
+                  >
+                    <optgroup label="Sans-Serif (Modern & Clean)">
+                      <option value="Inter, sans-serif">Inter (Figma Standard)</option>
+                      <option value="Roboto, sans-serif">Roboto</option>
+                      <option value="Poppins, sans-serif">Poppins</option>
+                      <option value="Montserrat, sans-serif">Montserrat</option>
+                      <option value="-apple-system, BlinkMacSystemFont, sans-serif">SF Pro / Apple</option>
+                      <option value="system-ui, sans-serif">System Default</option>
+                    </optgroup>
+                    <optgroup label="Serif (Editorial & Elegant)">
+                      <option value="'Playfair Display', serif">Playfair Display</option>
+                      <option value="Merriweather, serif">Merriweather</option>
+                      <option value="Georgia, serif">Georgia</option>
+                    </optgroup>
+                    <optgroup label="Monospace (Code & Technical)">
+                      <option value="'Fira Code', monospace">Fira Code</option>
+                      <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                      <option value="ui-monospace, monospace">Consolas / Mono</option>
+                    </optgroup>
+                  </select>
+                </div>
 
-                <div className="figma-input-group">
-                  <span className="figma-input-label">Sz</span>
-                  <input
-                    type="number"
-                    min="8"
-                    max="200"
-                    value={primaryNode.fontSize || 16}
-                    onChange={(e) => updateNode(primaryNode.id, { fontSize: Math.max(8, Number(e.target.value)) })}
-                    className="figma-input-field"
+                {/* 2. Font Weight & Size */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Weight</label>
+                    <select
+                      value={textNode.fontWeight || 'normal'}
+                      onChange={(e) => updateNode(textNode.id, { fontWeight: e.target.value })}
+                      aria-label="Font Weight"
+                      className="w-full bg-[#1E1E1E] border border-[#383838] rounded px-2 py-1.5 text-xs text-white focus:outline-none cursor-pointer"
+                    >
+                      <option value="300">Light (300)</option>
+                      <option value="normal">Regular (400)</option>
+                      <option value="500">Medium (500)</option>
+                      <option value="600">Semibold (600)</option>
+                      <option value="bold">Bold (700)</option>
+                      <option value="800">Extra Bold (800)</option>
+                      <option value="900">Black (900)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Size (px)</label>
+                    <div className="flex items-center bg-[#1E1E1E] border border-[#383838] rounded overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => updateNode(textNode.id, { fontSize: Math.max(8, (textNode.fontSize || 16) - 1) })}
+                        className="px-2 py-1.5 text-[#7E7E7E] hover:text-white hover:bg-[#2C2C2C] transition-colors"
+                        title="Decrease size"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <input
+                        type="number"
+                        min="8"
+                        max="240"
+                        value={textNode.fontSize || 16}
+                        onChange={(e) => updateNode(textNode.id, { fontSize: Math.max(8, Number(e.target.value)) })}
+                        className="w-full bg-transparent text-center text-xs text-white focus:outline-none py-1"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => updateNode(textNode.id, { fontSize: Math.min(240, (textNode.fontSize || 16) + 1) })}
+                        className="px-2 py-1.5 text-[#7E7E7E] hover:text-white hover:bg-[#2C2C2C] transition-colors"
+                        title="Increase size"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Quick Size Chips */}
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
+                  {presetSizes.map((sz) => (
+                    <button
+                      key={sz}
+                      type="button"
+                      onClick={() => updateNode(textNode.id, { fontSize: sz })}
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors shrink-0 ${
+                        textNode.fontSize === sz
+                          ? 'bg-[#0D99FF] text-white font-bold'
+                          : 'bg-[#1E1E1E] text-[#B3B3B3] hover:bg-[#383838] hover:text-white border border-[#383838]'
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 4. Style & Decoration Buttons (Bold, Italic, Underline, Strikethrough) */}
+                <div>
+                  <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Text Style</label>
+                  <div className="grid grid-cols-4 gap-1 bg-[#1E1E1E] p-1 rounded-lg border border-[#383838] text-center">
+                    <button
+                      type="button"
+                      onClick={() => updateNode(textNode.id, { fontWeight: isBold ? 'normal' : 'bold' })}
+                      className={`p-1.5 rounded flex items-center justify-center transition-colors ${
+                        isBold ? 'bg-[#0D99FF] text-white' : 'text-[#7E7E7E] hover:text-white hover:bg-[#2C2C2C]'
+                      }`}
+                      title={isBold ? 'Remove Bold' : 'Make Bold'}
+                      aria-label="Bold"
+                    >
+                      <Bold className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateNode(textNode.id, { fontStyle: isItalic ? 'normal' : 'italic' })}
+                      className={`p-1.5 rounded flex items-center justify-center transition-colors ${
+                        isItalic ? 'bg-[#0D99FF] text-white' : 'text-[#7E7E7E] hover:text-white hover:bg-[#2C2C2C]'
+                      }`}
+                      title={isItalic ? 'Remove Italic' : 'Make Italic'}
+                      aria-label="Italic"
+                    >
+                      <Italic className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateNode(textNode.id, { textDecoration: isUnderline ? 'none' : 'underline' })}
+                      className={`p-1.5 rounded flex items-center justify-center transition-colors ${
+                        isUnderline ? 'bg-[#0D99FF] text-white' : 'text-[#7E7E7E] hover:text-white hover:bg-[#2C2C2C]'
+                      }`}
+                      title={isUnderline ? 'Remove Underline' : 'Underline'}
+                      aria-label="Underline"
+                    >
+                      <Underline className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateNode(textNode.id, { textDecoration: isStrikethrough ? 'none' : 'line-through' })}
+                      className={`p-1.5 rounded flex items-center justify-center transition-colors ${
+                        isStrikethrough ? 'bg-[#0D99FF] text-white' : 'text-[#7E7E7E] hover:text-white hover:bg-[#2C2C2C]'
+                      }`}
+                      title={isStrikethrough ? 'Remove Strikethrough' : 'Strikethrough'}
+                      aria-label="Strikethrough"
+                    >
+                      <Strikethrough className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 5. Text Alignment & Letter Spacing */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Alignment</label>
+                    <div className="grid grid-cols-3 gap-0.5 bg-[#1E1E1E] p-0.5 rounded border border-[#383838] text-center">
+                      <button
+                        type="button"
+                        onClick={() => updateNode(textNode.id, { textAlign: 'left' })}
+                        className={`p-1 rounded ${
+                          textNode.textAlign === 'left' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
+                        }`}
+                        title="Align Left"
+                        aria-label="Align Left"
+                      >
+                        <AlignLeft className="w-3.5 h-3.5 mx-auto" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateNode(textNode.id, { textAlign: 'center' })}
+                        className={`p-1 rounded ${
+                          textNode.textAlign === 'center' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
+                        }`}
+                        title="Align Center"
+                        aria-label="Align Center"
+                      >
+                        <AlignCenter className="w-3.5 h-3.5 mx-auto" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateNode(textNode.id, { textAlign: 'right' })}
+                        className={`p-1 rounded ${
+                          textNode.textAlign === 'right' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
+                        }`}
+                        title="Align Right"
+                        aria-label="Align Right"
+                      >
+                        <AlignRight className="w-3.5 h-3.5 mx-auto" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Letter Spacing</label>
+                    <div className="flex items-center bg-[#1E1E1E] border border-[#383838] rounded px-2 py-1 text-xs">
+                      <span className="text-[#7E7E7E] text-[10px] mr-1.5 font-mono">px</span>
+                      <input
+                        type="number"
+                        min="-5"
+                        max="20"
+                        value={textNode.letterSpacing ?? 0}
+                        onChange={(e) => updateNode(textNode.id, { letterSpacing: Number(e.target.value) })}
+                        className="w-full bg-transparent text-white text-xs focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. Text Transform (UPPERCASE, lowercase, Title Case) */}
+                <div>
+                  <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Letter Case</label>
+                  <div className="grid grid-cols-3 gap-1 bg-[#1E1E1E] p-1 rounded border border-[#383838] text-center text-xs">
+                    <button
+                      type="button"
+                      onClick={() => updateNode(textNode.id, { text: (textNode.text || '').toUpperCase() })}
+                      className="px-2 py-1 rounded bg-[#2C2C2C] hover:bg-[#383838] text-[#B3B3B3] hover:text-white text-[11px] font-bold transition-colors"
+                      title="Transform to UPPERCASE"
+                    >
+                      AA
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateNode(textNode.id, { text: (textNode.text || '').toLowerCase() })}
+                      className="px-2 py-1 rounded bg-[#2C2C2C] hover:bg-[#383838] text-[#B3B3B3] hover:text-white text-[11px] font-bold transition-colors"
+                      title="Transform to lowercase"
+                    >
+                      aa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateNode(textNode.id, {
+                          text: (textNode.text || '').replace(
+                            /\w\S*/g,
+                            (w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase()
+                          ),
+                        })
+                      }
+                      className="px-2 py-1 rounded bg-[#2C2C2C] hover:bg-[#383838] text-[#B3B3B3] hover:text-white text-[11px] font-bold transition-colors"
+                      title="Transform to Title Case"
+                    >
+                      Aa
+                    </button>
+                  </div>
+                </div>
+
+                {/* 7. Direct Text Content Editor */}
+                <div>
+                  <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Text Content</label>
+                  <textarea
+                    rows={2}
+                    value={textNode.text || ''}
+                    onChange={(e) => updateNode(textNode.id, { text: e.target.value })}
+                    className="w-full bg-[#1E1E1E] border border-[#383838] rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#0D99FF] resize-none"
+                    placeholder="Enter text..."
                   />
                 </div>
               </div>
-
-              {/* Text Alignment */}
-              <div className="grid grid-cols-3 gap-0.5 bg-[#1E1E1E] p-0.5 rounded border border-[#383838] text-center">
-                <button
-                  type="button"
-                  onClick={() => updateNode(primaryNode.id, { textAlign: 'left' })}
-                  className={`p-1 rounded ${
-                    primaryNode.textAlign === 'left' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
-                  }`}
-                  title="Align Left"
-                  aria-label="Align Left"
-                >
-                  <AlignLeft className="w-3.5 h-3.5 mx-auto" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateNode(primaryNode.id, { textAlign: 'center' })}
-                  className={`p-1 rounded ${
-                    primaryNode.textAlign === 'center' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
-                  }`}
-                  title="Align Center"
-                  aria-label="Align Center"
-                >
-                  <AlignCenter className="w-3.5 h-3.5 mx-auto" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateNode(primaryNode.id, { textAlign: 'right' })}
-                  className={`p-1 rounded ${
-                    primaryNode.textAlign === 'right' ? 'bg-[#383838] text-white' : 'text-[#7E7E7E] hover:text-white'
-                  }`}
-                  title="Align Right"
-                  aria-label="Align Right"
-                >
-                  <AlignRight className="w-3.5 h-3.5 mx-auto" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )
+      })()}
 
       {/* 3. APPEARANCE SECTION (Fill, Stroke, Opacity) */}
       <div className="pt-2 border-t border-[#383838] space-y-2.5">

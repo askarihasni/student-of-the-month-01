@@ -93,6 +93,10 @@ export interface TextNode extends BaseNode {
   fontSize: number
   fontFamily: string
   fontWeight: string
+  fontStyle?: 'normal' | 'italic'
+  textDecoration?: 'none' | 'underline' | 'line-through'
+  lineHeight?: number
+  letterSpacing?: number
   textAlign: 'left' | 'center' | 'right'
   fill: string
   shadow?: ShadowEffect

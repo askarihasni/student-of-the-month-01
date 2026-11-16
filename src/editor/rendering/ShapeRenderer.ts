@@ -138,9 +138,21 @@ export class ShapeRenderer {
   }
 
   static drawText(ctx: CanvasRenderingContext2D, node: TextNode): void {
-    ctx.font = `${node.fontWeight || 'normal'} ${node.fontSize || 16}px ${node.fontFamily || 'Inter, sans-serif'}`
+    const italic = node.fontStyle === 'italic' ? 'italic ' : ''
+    const weight = node.fontWeight || 'normal'
+    const size = node.fontSize || 16
+    const family = node.fontFamily || 'Inter, sans-serif'
+    ctx.font = `${italic}${weight} ${size}px ${family}`
     ctx.fillStyle = node.fill || '#FFFFFF'
     ctx.textBaseline = 'top'
+
+    if ('letterSpacing' in ctx && typeof node.letterSpacing === 'number' && node.letterSpacing !== 0) {
+      try {
+        (ctx as any).letterSpacing = `${node.letterSpacing}px`
+      } catch {
+        // ignore if not supported in test environment
+      }
+    }
 
     let startX = node.x
     if (node.textAlign === 'center') {
@@ -155,10 +167,42 @@ export class ShapeRenderer {
 
     // Split multi-line text
     const lines = (node.text || '').split('\n')
-    const lineHeight = (node.fontSize || 16) * 1.3
+    const lineHeightRatio = node.lineHeight ? node.lineHeight / size : 1.3
+    const lineHeight = size * lineHeightRatio
 
     lines.forEach((line, index) => {
-      ctx.fillText(line, startX, node.y + index * lineHeight)
+      const lineY = node.y + index * lineHeight
+      ctx.fillText(line, startX, lineY)
+
+      // Render text decoration (underline / line-through)
+      if (node.textDecoration === 'underline' || node.textDecoration === 'line-through') {
+        const textMetrics = ctx.measureText(line)
+        const textWidth = textMetrics.width
+        let lineStartX = startX
+        if (node.textAlign === 'center') {
+          lineStartX = startX - textWidth / 2
+        } else if (node.textAlign === 'right') {
+          lineStartX = startX - textWidth
+        }
+
+        ctx.save()
+        ctx.strokeStyle = node.fill || '#FFFFFF'
+        ctx.lineWidth = Math.max(1, Math.round(size / 14))
+        ctx.beginPath()
+
+        if (node.textDecoration === 'underline') {
+          const underY = lineY + size * 1.15
+          ctx.moveTo(lineStartX, underY)
+          ctx.lineTo(lineStartX + textWidth, underY)
+        } else if (node.textDecoration === 'line-through') {
+          const strikeY = lineY + size * 0.55
+          ctx.moveTo(lineStartX, strikeY)
+          ctx.lineTo(lineStartX + textWidth, strikeY)
+        }
+
+        ctx.stroke()
+        ctx.restore()
+      }
     })
   }
 
