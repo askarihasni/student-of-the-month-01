@@ -15,6 +15,7 @@ import {
   createText,
   createFrame,
   createPath,
+  createImage,
   generateId,
 } from '../../editor/model/factory'
 import { useEditorStore } from '../../store/editorStore'
@@ -553,9 +554,49 @@ export const CanvasViewport: React.FC = () => {
       )
     : null
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files?.[0]
+    if (!file || !file.type.startsWith('image/')) return
+
+    const rect = canvasRef.current?.getBoundingClientRect()
+    if (!rect) return
+
+    const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+    const worldPos = ViewportController.screenToWorld(screenPos, viewport)
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const src = event.target?.result as string
+      const img = new Image()
+      img.onload = () => {
+        const aspect = img.naturalWidth / (img.naturalHeight || 1)
+        const width = Math.min(400, Math.max(100, img.naturalWidth))
+        const height = width / aspect
+        const imgNode = createImage({
+          x: Math.round(worldPos.x - width / 2),
+          y: Math.round(worldPos.y - height / 2),
+          width: Math.round(width),
+          height: Math.round(height),
+          src,
+          name: file.name.replace(/\.[^/.]+$/, ''),
+        })
+        addNode(imgNode)
+      }
+      img.src = src
+    }
+    reader.readAsDataURL(file)
+  }
+
   return (
     <div
       ref={containerRef}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       className="flex-1 h-full w-full relative overflow-hidden bg-zinc-950 focus:outline-none"
       style={{ cursor: cursorStyle }}
     >

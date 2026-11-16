@@ -17,8 +17,10 @@ import {
   Undo2,
   Maximize2,
   MinusCircle,
+  Image as ImageIcon,
 } from 'lucide-react'
 import type { EditorTool } from '../../types/document'
+import { createImage } from '../../editor/model/factory'
 import { useEditorStore } from '../../store/editorStore'
 import { useUIStore } from '../../store/uiStore'
 import { Tooltip } from '../../components/ui/Tooltip'
@@ -41,7 +43,37 @@ export const TopToolbar: React.FC<{
     undo,
     redo,
     saveStatus,
+    addNode,
   } = useEditorStore()
+
+  const imageInputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const src = event.target?.result as string
+      const img = new Image()
+      img.onload = () => {
+        const aspect = img.naturalWidth / (img.naturalHeight || 1)
+        const width = Math.min(360, Math.max(100, img.naturalWidth))
+        const height = width / aspect
+        const imgNode = createImage({
+          x: 200,
+          y: 200,
+          width: Math.round(width),
+          height: Math.round(height),
+          src,
+          name: file.name.replace(/\.[^/.]+$/, ''),
+        })
+        addNode(imgNode)
+      }
+      img.src = src
+    }
+    reader.readAsDataURL(file)
+  }
 
   const { closeDocument } = useUIStore()
 
@@ -181,6 +213,25 @@ export const TopToolbar: React.FC<{
             </Tooltip>
           )
         })}
+
+        <input
+          type="file"
+          ref={imageInputRef}
+          onChange={handleImageFileChange}
+          accept="image/png,image/jpeg,image/svg+xml,image/webp"
+          className="hidden"
+        />
+
+        <Tooltip content="Insert Image">
+          <button
+            type="button"
+            onClick={() => imageInputRef.current?.click()}
+            className="p-1.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            aria-label="Insert Image"
+          >
+            <ImageIcon className="w-4 h-4" />
+          </button>
+        </Tooltip>
       </div>
 
       {/* Right: Zoom controls, Version History, Export */}
