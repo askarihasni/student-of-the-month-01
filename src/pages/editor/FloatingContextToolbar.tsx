@@ -28,6 +28,8 @@ export const FloatingContextToolbar: React.FC = () => {
     alignSelected,
   } = useEditorStore()
 
+  const [isColorMenuOpen, setIsColorMenuOpen] = useState(false)
+
   const activePage =
     document?.pages.find((p) => p.id === activePageId) || document?.pages[0]
   const rawNodes = activePage?.nodes
@@ -43,7 +45,6 @@ export const FloatingContextToolbar: React.FC = () => {
 
   const primaryNode = selectedNodes[0]
   const aabb = NodeUtils.getNodesAABB(selectedNodes)
-  const [isColorMenuOpen, setIsColorMenuOpen] = useState(false)
 
   const handleAlign = (type: 'left' | 'center' | 'right') => {
     alignSelected(type)
