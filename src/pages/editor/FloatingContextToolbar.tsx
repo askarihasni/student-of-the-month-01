@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   AlignCenter,
   AlignLeft,
@@ -43,6 +43,7 @@ export const FloatingContextToolbar: React.FC = () => {
 
   const primaryNode = selectedNodes[0]
   const aabb = NodeUtils.getNodesAABB(selectedNodes)
+  const [isColorMenuOpen, setIsColorMenuOpen] = useState(false)
 
   const handleAlign = (type: 'left' | 'center' | 'right') => {
     alignSelected(type)
@@ -94,31 +95,122 @@ export const FloatingContextToolbar: React.FC = () => {
         </button>
       </div>
 
-      {/* Quick Color Swatch (Fill / Font Color) */}
+      {/* Quick Color Swatch with on-canvas Palette popover (Fill / Font Color) */}
       {'fill' in primaryNode && (
-        <div className="flex items-center gap-1.5 px-1.5 border-r border-[#3E3E3E]" title="Quick Color (Fill / Font Color)">
-          <label className="relative flex items-center justify-center cursor-pointer group" title="Change Color">
-            <span
-              className="w-4 h-4 rounded-full border border-white/30 shadow-inner group-hover:scale-110 transition-transform inline-block"
-              style={{
-                backgroundColor:
-                  primaryNode.fill && primaryNode.fill !== 'transparent'
-                    ? primaryNode.fill
-                    : '#FFFFFF',
-              }}
-            />
-            <input
-              type="color"
-              value={
-                primaryNode.fill && primaryNode.fill.startsWith('#')
+        <div className="relative flex items-center px-1.5 border-r border-[#3E3E3E]">
+          <button
+            type="button"
+            onClick={() => setIsColorMenuOpen(!isColorMenuOpen)}
+            className="w-5 h-5 rounded-full border border-white/40 shadow-inner hover:scale-110 transition-all flex items-center justify-center overflow-hidden focus:outline-none"
+            style={{
+              backgroundColor:
+                primaryNode.fill && primaryNode.fill !== 'transparent'
                   ? primaryNode.fill
-                  : '#FFFFFF'
-              }
-              onChange={(e) => updateNode(primaryNode.id, { fill: e.target.value })}
-              className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
-              title="Pick color"
-            />
-          </label>
+                  : 'transparent',
+              backgroundImage:
+                !primaryNode.fill || primaryNode.fill === 'transparent'
+                  ? 'repeating-conic-gradient(#555 0% 25%, #333 0% 50%) 50% / 4px 4px'
+                  : undefined,
+            }}
+            title="Open Quick Color Palette"
+            aria-label="Color palette"
+          />
+
+          {isColorMenuOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsColorMenuOpen(false)}
+              />
+              <div
+                className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 p-2.5 bg-[#1E1E1E] border border-[#383838] rounded-xl shadow-2xl w-56 text-white animate-in fade-in slide-in-from-bottom-2 duration-100"
+                style={{ boxShadow: '0 12px 36px rgba(0, 0, 0, 0.6)' }}
+              >
+                <div className="flex items-center justify-between text-[10px] text-[#8C8C8C] uppercase font-semibold mb-2">
+                  <span>Color Palette</span>
+                  <span className="font-mono text-white text-[9px] bg-[#2C2C2C] px-1 py-0.5 rounded">
+                    {primaryNode.fill || 'TRANSPARENT'}
+                  </span>
+                </div>
+
+                {/* 14 quick swatches */}
+                <div className="grid grid-cols-7 gap-1.5 mb-2.5">
+                  {[
+                    { name: 'White', hex: '#FFFFFF' },
+                    { name: 'Light Gray', hex: '#CBD5E1' },
+                    { name: 'Slate Gray', hex: '#64748B' },
+                    { name: 'Dark Slate', hex: '#1E293B' },
+                    { name: 'Pure Black', hex: '#000000' },
+                    { name: 'Figma Blue', hex: '#0D99FF' },
+                    { name: 'Sky Cyan', hex: '#06B6D4' },
+                    { name: 'Emerald', hex: '#10B981' },
+                    { name: 'Lime', hex: '#84CC16' },
+                    { name: 'Amber Gold', hex: '#F59E0B' },
+                    { name: 'Coral Red', hex: '#EF4444' },
+                    { name: 'Purple', hex: '#A855F7' },
+                    { name: 'Pink', hex: '#EC4899' },
+                    { name: 'Transparent', hex: 'transparent' },
+                  ].map((swatch) => (
+                    <button
+                      key={swatch.hex}
+                      type="button"
+                      onClick={() => {
+                        selectedNodes.forEach((n) => {
+                          if ('fill' in n) updateNode(n.id, { fill: swatch.hex })
+                        })
+                        setIsColorMenuOpen(false)
+                      }}
+                      className="w-full aspect-square rounded-[3px] border border-[#444] hover:border-white hover:scale-110 transition-all relative overflow-hidden"
+                      style={{
+                        backgroundColor:
+                          swatch.hex === 'transparent' ? 'transparent' : swatch.hex,
+                        backgroundImage:
+                          swatch.hex === 'transparent'
+                            ? 'repeating-conic-gradient(#666 0% 25%, #333 0% 50%) 50% / 4px 4px'
+                            : undefined,
+                      }}
+                      title={`${swatch.name} (${swatch.hex})`}
+                    />
+                  ))}
+                </div>
+
+                {/* Custom Native Color Wheel Picker */}
+                <div className="flex items-center justify-between pt-1.5 border-t border-[#333] text-[10px]">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[#A0A0A0] hover:text-white">
+                    <span className="w-3.5 h-3.5 rounded-full border border-white/40 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-400" />
+                    <span>Color Wheel</span>
+                    <input
+                      type="color"
+                      value={
+                        primaryNode.fill && primaryNode.fill.startsWith('#')
+                          ? primaryNode.fill
+                          : '#FFFFFF'
+                      }
+                      onChange={(e) => {
+                        selectedNodes.forEach((n) => {
+                          if ('fill' in n) updateNode(n.id, { fill: e.target.value })
+                        })
+                      }}
+                      className="opacity-0 absolute w-0 h-0 pointer-events-none"
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      selectedNodes.forEach((n) => {
+                        if ('fill' in n) updateNode(n.id, { fill: 'transparent' })
+                      })
+                      setIsColorMenuOpen(false)
+                    }}
+                    className="text-[#8C8C8C] hover:text-[#FF7262] transition-colors"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

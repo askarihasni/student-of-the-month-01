@@ -116,7 +116,7 @@ export const RightSidebar: React.FC = () => {
             />
           </div>
 
-          <div>
+          <div className="bg-[#1E1E1E] p-2.5 rounded-lg border border-[#383838]">
             <ColorPicker
               label="Canvas Background"
               color={activePage?.backgroundColor || '#1E1E1E'}
@@ -545,68 +545,21 @@ export const RightSidebar: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 5. Font Color Picker & Quick Palette */}
-                <div className="bg-[#1E1E1E] p-2.5 rounded-lg border border-[#383838] space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[10px] text-[#7E7E7E] uppercase font-semibold">
-                      <Palette className="w-3.5 h-3.5 text-[#0D99FF]" />
-                      <span>Font Color</span>
-                    </div>
-                    <span className="text-[10px] text-[#B3B3B3] font-mono uppercase bg-[#2C2C2C] px-1.5 py-0.5 rounded border border-[#383838]">
-                      {textNode.fill || '#FFFFFF'}
-                    </span>
-                  </div>
-
+                {/* 5. Font Color Picker */}
+                <div className="bg-[#1E1E1E] p-2.5 rounded-lg border border-[#383838]">
                   <ColorPicker
+                    label="Font Color"
                     color={textNode.fill || '#FFFFFF'}
-                    onChange={(color) => updateNode(textNode.id, { fill: color })}
+                    onChange={(color) => {
+                      if (selectedNodes.length > 1) {
+                        selectedNodes.forEach((n) => {
+                          if ('fill' in n) updateNode(n.id, { fill: color })
+                        })
+                      } else {
+                        updateNode(textNode.id, { fill: color })
+                      }
+                    }}
                   />
-
-                  {/* Quick Color Swatches */}
-                  <div className="pt-2 border-t border-[#2C2C2C]">
-                    <div className="text-[9px] text-[#7E7E7E] uppercase font-semibold mb-1.5">Quick Palette</div>
-                    <div className="grid grid-cols-6 gap-1.5">
-                      {[
-                        { name: 'White', hex: '#FFFFFF' },
-                        { name: 'Light Gray', hex: '#E2E8F0' },
-                        { name: 'Slate Gray', hex: '#94A3B8' },
-                        { name: 'Dark Slate', hex: '#1E293B' },
-                        { name: 'Pure Black', hex: '#000000' },
-                        { name: 'Figma Blue', hex: '#0D99FF' },
-                        { name: 'Sky Cyan', hex: '#06B6D4' },
-                        { name: 'Emerald', hex: '#10B981' },
-                        { name: 'Lime Green', hex: '#84CC16' },
-                        { name: 'Amber Gold', hex: '#F59E0B' },
-                        { name: 'Coral Red', hex: '#EF4444' },
-                        { name: 'Purple', hex: '#A855F7' },
-                      ].map((item) => {
-                        const isSelected = (textNode.fill || '#FFFFFF').toLowerCase() === item.hex.toLowerCase()
-                        return (
-                          <button
-                            key={item.hex}
-                            type="button"
-                            onClick={() => updateNode(textNode.id, { fill: item.hex })}
-                            className={`w-full aspect-square rounded-[4px] border transition-all hover:scale-110 flex items-center justify-center relative ${
-                              isSelected
-                                ? 'border-[#0D99FF] ring-2 ring-[#0D99FF]/50 scale-105'
-                                : 'border-[#444444] hover:border-white'
-                            }`}
-                            style={{ backgroundColor: item.hex }}
-                            title={`${item.name} (${item.hex})`}
-                            aria-label={`Select ${item.name}`}
-                          >
-                            {isSelected && (
-                              <div
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  item.hex === '#FFFFFF' || item.hex === '#E2E8F0' ? 'bg-black' : 'bg-white'
-                                }`}
-                              />
-                            )}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
                 </div>
 
                 {/* 6. Text Alignment & Letter Spacing */}
@@ -737,20 +690,38 @@ export const RightSidebar: React.FC = () => {
           <div className="space-y-3 animate-in fade-in duration-100">
             {/* Fill Color */}
             {'fill' in primaryNode && (
-              <ColorPicker
-                label="Fill"
-                color={primaryNode.fill || 'transparent'}
-                onChange={(color) => updateNode(primaryNode.id, { fill: color })}
-              />
+              <div className="bg-[#1E1E1E] p-2.5 rounded-lg border border-[#383838]">
+                <ColorPicker
+                  label="Fill"
+                  color={primaryNode.fill || 'transparent'}
+                  onChange={(color) => {
+                    if (selectedNodes.length > 1) {
+                      selectedNodes.forEach((n) => {
+                        if ('fill' in n) updateNode(n.id, { fill: color })
+                      })
+                    } else {
+                      updateNode(primaryNode.id, { fill: color })
+                    }
+                  }}
+                />
+              </div>
             )}
 
             {/* Stroke Color & Width */}
             {'stroke' in primaryNode && (
-              <div className="space-y-2">
+              <div className="bg-[#1E1E1E] p-2.5 rounded-lg border border-[#383838] space-y-2">
                 <ColorPicker
                   label="Stroke"
                   color={primaryNode.stroke || 'transparent'}
-                  onChange={(color) => updateNode(primaryNode.id, { stroke: color })}
+                  onChange={(color) => {
+                    if (selectedNodes.length > 1) {
+                      selectedNodes.forEach((n) => {
+                        if ('stroke' in n) updateNode(n.id, { stroke: color })
+                      })
+                    } else {
+                      updateNode(primaryNode.id, { stroke: color })
+                    }
+                  }}
                 />
                 <div className="figma-input-group">
                   <span className="figma-input-label">Width</span>
@@ -759,9 +730,16 @@ export const RightSidebar: React.FC = () => {
                     min="0"
                     max="100"
                     value={primaryNode.strokeWidth ?? 1}
-                    onChange={(e) =>
-                      updateNode(primaryNode.id, { strokeWidth: Math.max(0, Number(e.target.value)) })
-                    }
+                    onChange={(e) => {
+                      const w = Math.max(0, Number(e.target.value))
+                      if (selectedNodes.length > 1) {
+                        selectedNodes.forEach((n) => {
+                          if ('strokeWidth' in n) updateNode(n.id, { strokeWidth: w })
+                        })
+                      } else {
+                        updateNode(primaryNode.id, { strokeWidth: w })
+                      }
+                    }}
                     className="figma-input-field"
                   />
                 </div>
