@@ -13,11 +13,13 @@ export function App() {
     checkAuth()
   }, [checkAuth])
 
+  const screen = currentScreen || 'dashboard'
+
   return (
-    <div className="w-full h-full min-h-screen bg-zinc-950 font-sans antialiased text-zinc-100">
-      {currentScreen === 'auth' && <AuthPage />}
-      {currentScreen === 'dashboard' && <DashboardPage />}
-      {currentScreen === 'editor' && <EditorPage />}
+    <div className="w-full h-full min-h-screen bg-[#1E1E1E] font-sans antialiased text-zinc-100">
+      {screen === 'auth' && <AuthPage />}
+      {screen === 'dashboard' && <DashboardPage />}
+      {screen === 'editor' && <EditorPage />}
     </div>
   )
 }
