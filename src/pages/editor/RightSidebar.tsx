@@ -19,6 +19,7 @@ import {
   Minus,
   MoveDown,
   MoveUp,
+  Palette,
   PanelRightClose,
   PanelRightOpen,
   Plus,
@@ -544,7 +545,71 @@ export const RightSidebar: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 5. Text Alignment & Letter Spacing */}
+                {/* 5. Font Color Picker & Quick Palette */}
+                <div className="bg-[#1E1E1E] p-2.5 rounded-lg border border-[#383838] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[10px] text-[#7E7E7E] uppercase font-semibold">
+                      <Palette className="w-3.5 h-3.5 text-[#0D99FF]" />
+                      <span>Font Color</span>
+                    </div>
+                    <span className="text-[10px] text-[#B3B3B3] font-mono uppercase bg-[#2C2C2C] px-1.5 py-0.5 rounded border border-[#383838]">
+                      {textNode.fill || '#FFFFFF'}
+                    </span>
+                  </div>
+
+                  <ColorPicker
+                    color={textNode.fill || '#FFFFFF'}
+                    onChange={(color) => updateNode(textNode.id, { fill: color })}
+                  />
+
+                  {/* Quick Color Swatches */}
+                  <div className="pt-2 border-t border-[#2C2C2C]">
+                    <div className="text-[9px] text-[#7E7E7E] uppercase font-semibold mb-1.5">Quick Palette</div>
+                    <div className="grid grid-cols-6 gap-1.5">
+                      {[
+                        { name: 'White', hex: '#FFFFFF' },
+                        { name: 'Light Gray', hex: '#E2E8F0' },
+                        { name: 'Slate Gray', hex: '#94A3B8' },
+                        { name: 'Dark Slate', hex: '#1E293B' },
+                        { name: 'Pure Black', hex: '#000000' },
+                        { name: 'Figma Blue', hex: '#0D99FF' },
+                        { name: 'Sky Cyan', hex: '#06B6D4' },
+                        { name: 'Emerald', hex: '#10B981' },
+                        { name: 'Lime Green', hex: '#84CC16' },
+                        { name: 'Amber Gold', hex: '#F59E0B' },
+                        { name: 'Coral Red', hex: '#EF4444' },
+                        { name: 'Purple', hex: '#A855F7' },
+                      ].map((item) => {
+                        const isSelected = (textNode.fill || '#FFFFFF').toLowerCase() === item.hex.toLowerCase()
+                        return (
+                          <button
+                            key={item.hex}
+                            type="button"
+                            onClick={() => updateNode(textNode.id, { fill: item.hex })}
+                            className={`w-full aspect-square rounded-[4px] border transition-all hover:scale-110 flex items-center justify-center relative ${
+                              isSelected
+                                ? 'border-[#0D99FF] ring-2 ring-[#0D99FF]/50 scale-105'
+                                : 'border-[#444444] hover:border-white'
+                            }`}
+                            style={{ backgroundColor: item.hex }}
+                            title={`${item.name} (${item.hex})`}
+                            aria-label={`Select ${item.name}`}
+                          >
+                            {isSelected && (
+                              <div
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  item.hex === '#FFFFFF' || item.hex === '#E2E8F0' ? 'bg-black' : 'bg-white'
+                                }`}
+                              />
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. Text Alignment & Letter Spacing */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Alignment</label>
@@ -601,7 +666,7 @@ export const RightSidebar: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 6. Text Transform (UPPERCASE, lowercase, Title Case) */}
+                {/* 7. Text Transform (UPPERCASE, lowercase, Title Case) */}
                 <div>
                   <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Letter Case</label>
                   <div className="grid grid-cols-3 gap-1 bg-[#1E1E1E] p-1 rounded border border-[#383838] text-center text-xs">
@@ -639,7 +704,7 @@ export const RightSidebar: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 7. Direct Text Content Editor */}
+                {/* 8. Direct Text Content Editor */}
                 <div>
                   <label className="block text-[10px] text-[#7E7E7E] uppercase font-semibold mb-1">Text Content</label>
                   <textarea

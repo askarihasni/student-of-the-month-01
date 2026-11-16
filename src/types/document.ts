@@ -99,6 +99,8 @@ export interface TextNode extends BaseNode {
   letterSpacing?: number
   textAlign: 'left' | 'center' | 'right'
   fill: string
+  stroke?: string
+  strokeWidth?: number
   shadow?: ShadowEffect
 }
 

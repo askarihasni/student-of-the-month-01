@@ -174,6 +174,14 @@ export class ShapeRenderer {
       const lineY = node.y + index * lineHeight
       ctx.fillText(line, startX, lineY)
 
+      if (node.stroke && node.stroke !== 'transparent') {
+        ctx.save()
+        ctx.strokeStyle = node.stroke
+        ctx.lineWidth = node.strokeWidth || 1
+        ctx.strokeText(line, startX, lineY)
+        ctx.restore()
+      }
+
       // Render text decoration (underline / line-through)
       if (node.textDecoration === 'underline' || node.textDecoration === 'line-through') {
         const textMetrics = ctx.measureText(line)

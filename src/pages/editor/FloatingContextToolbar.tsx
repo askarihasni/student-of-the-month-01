@@ -94,6 +94,34 @@ export const FloatingContextToolbar: React.FC = () => {
         </button>
       </div>
 
+      {/* Quick Color Swatch (Fill / Font Color) */}
+      {'fill' in primaryNode && (
+        <div className="flex items-center gap-1.5 px-1.5 border-r border-[#3E3E3E]" title="Quick Color (Fill / Font Color)">
+          <label className="relative flex items-center justify-center cursor-pointer group" title="Change Color">
+            <span
+              className="w-4 h-4 rounded-full border border-white/30 shadow-inner group-hover:scale-110 transition-transform inline-block"
+              style={{
+                backgroundColor:
+                  primaryNode.fill && primaryNode.fill !== 'transparent'
+                    ? primaryNode.fill
+                    : '#FFFFFF',
+              }}
+            />
+            <input
+              type="color"
+              value={
+                primaryNode.fill && primaryNode.fill.startsWith('#')
+                  ? primaryNode.fill
+                  : '#FFFFFF'
+              }
+              onChange={(e) => updateNode(primaryNode.id, { fill: e.target.value })}
+              className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+              title="Pick color"
+            />
+          </label>
+        </div>
+      )}
+
       {/* Layer ordering & actions */}
       <div className="flex items-center gap-0.5 px-1 border-r border-[#3E3E3E]">
         <button
