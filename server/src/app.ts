@@ -24,6 +24,7 @@ import { permissionsRouter } from './modules/permissions/permissions.routes.js';
 import { assetsRouter } from './modules/assets/assets.routes.js';
 import { commentsRouter } from './modules/comments/comments.routes.js';
 import { documentExportsRouter, exportsRouter } from './modules/exports/exports.routes.js';
+import { aiRouter } from './modules/ai/ai.routes.js';
 
 export const app = express();
 
@@ -117,6 +118,7 @@ app.use('/api/documents/:id/assets', assetsRouter);
 app.use('/api/documents/:id/comments', commentsRouter);
 app.use('/api/documents/:id/exports', documentExportsRouter);
 app.use('/api/exports', exportsRouter);
+app.use('/api/ai', aiRouter);
 
 // 404 Route handler
 app.use((_req, _res, next) => {

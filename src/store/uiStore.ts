@@ -25,6 +25,7 @@ interface UIState {
   searchQuery: string
   dashboardViewMode: 'grid' | 'list'
   dashboardSortBy: 'updatedAt' | 'name'
+  isGeminiChatOpen: boolean
 
   setScreen: (screen: ScreenType) => void
   setAuthView: (view: AuthViewType) => void
@@ -34,6 +35,8 @@ interface UIState {
   setLeftSidebarTab: (tab: LeftSidebarTab) => void
   toggleLeftSidebar: () => void
   toggleRightSidebar: () => void
+  toggleGeminiChat: () => void
+  setGeminiChatOpen: (open: boolean) => void
   openModal: (modal: ModalType, targetId?: string, targetName?: string) => void
   closeModal: () => void
   setSearchQuery: (query: string) => void
@@ -55,6 +58,7 @@ export const useUIStore = create<UIState>((set) => ({
   searchQuery: '',
   dashboardViewMode: 'grid',
   dashboardSortBy: 'updatedAt',
+  isGeminiChatOpen: false,
 
   setScreen: (screen) => set({ currentScreen: screen }),
   setAuthView: (view) => set({ authView: view }),
@@ -64,6 +68,8 @@ export const useUIStore = create<UIState>((set) => ({
   setLeftSidebarTab: (tab) => set({ leftSidebarTab: tab }),
   toggleLeftSidebar: () => set((state) => ({ isLeftSidebarOpen: !state.isLeftSidebarOpen })),
   toggleRightSidebar: () => set((state) => ({ isRightSidebarOpen: !state.isRightSidebarOpen })),
+  toggleGeminiChat: () => set((state) => ({ isGeminiChatOpen: !state.isGeminiChatOpen })),
+  setGeminiChatOpen: (open) => set({ isGeminiChatOpen: open }),
   openModal: (modal, targetId = undefined, targetName = '') =>
     set({ activeModal: modal, deleteTargetId: targetId ?? null, deleteTargetName: targetName }),
   closeModal: () => set({ activeModal: null, deleteTargetId: null, deleteTargetName: '' }),

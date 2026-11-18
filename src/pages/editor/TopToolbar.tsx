@@ -16,6 +16,7 @@ import {
   Redo2,
   Share2,
   Square,
+  Sparkles,
   Type,
   Undo2,
   ChevronDown,
@@ -55,7 +56,7 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
     addNode,
   } = useEditorStore()
 
-  const { closeDocument } = useUIStore()
+  const { closeDocument, isGeminiChatOpen, toggleGeminiChat } = useUIStore()
   const { user } = useAuthStore()
 
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -287,6 +288,24 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
             <span className="w-2 h-2 rounded-full bg-emerald-400 absolute bottom-0 right-0 ring-1 ring-[#2C2C2C]" />
           </div>
         </div>
+
+        {/* Gemini AI Copilot Button */}
+        <button
+          type="button"
+          onClick={toggleGeminiChat}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-sm transition-all active:scale-95 ${
+            isGeminiChatOpen
+              ? 'bg-purple-600 text-white border-purple-400 shadow-purple-500/30 shadow-md ring-2 ring-purple-500/50'
+              : 'bg-gradient-to-r from-purple-900/40 via-[#2C2C2C] to-blue-900/40 hover:from-purple-800/60 hover:to-blue-800/60 border-purple-500/40 text-purple-200 hover:text-white'
+          }`}
+          title="Open Gemini AI Design Copilot (Ctrl + J)"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+          <span className="hidden sm:inline">Gemini AI</span>
+          <span className="text-[10px] bg-purple-950/80 px-1 py-0.5 rounded border border-purple-500/30 text-purple-300 font-mono hidden md:inline">
+            Ctrl+J
+          </span>
+        </button>
 
         {/* Share Button (Figma signature primary action) */}
         <button

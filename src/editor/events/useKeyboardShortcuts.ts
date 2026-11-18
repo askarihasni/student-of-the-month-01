@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useEditorStore } from '../../store/editorStore'
+import { useUIStore } from '../../store/uiStore'
 
 export function useKeyboardShortcuts() {
   const {
@@ -33,6 +34,13 @@ export function useKeyboardShortcuts() {
 
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
       const modifier = isMac ? e.metaKey : e.ctrlKey
+
+      // Ctrl / Cmd + J: Toggle Gemini AI Design Copilot
+      if (modifier && e.code === 'KeyJ') {
+        e.preventDefault()
+        useUIStore.getState().toggleGeminiChat()
+        return
+      }
 
       // Ctrl / Cmd + Z: Undo
       if (modifier && !e.shiftKey && e.code === 'KeyZ') {

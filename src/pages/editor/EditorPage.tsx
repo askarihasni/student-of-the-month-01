@@ -8,11 +8,15 @@ import { ExportModal } from './ExportModal'
 import { VersionHistoryModal } from './VersionHistoryModal'
 import { ShortcutsModal } from './ShortcutsModal'
 import { ShareModal } from './ShareModal'
+import { GeminiChatDrawer } from '../../components/ai/GeminiChatDrawer'
+import { useUIStore } from '../../store/uiStore'
 import { useKeyboardShortcuts } from '../../editor/events/useKeyboardShortcuts'
 
 export const EditorPage: React.FC = () => {
   // Bind global keyboard shortcuts
   useKeyboardShortcuts()
+
+  const { isGeminiChatOpen, setGeminiChatOpen } = useUIStore()
 
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
@@ -43,6 +47,9 @@ export const EditorPage: React.FC = () => {
       <VersionHistoryModal isOpen={historyModalOpen} onClose={() => setHistoryModalOpen(false)} />
       <ShortcutsModal isOpen={shortcutsModalOpen} onClose={() => setShortcutsModalOpen(false)} />
       <ShareModal isOpen={shareModalOpen} onClose={() => setShareModalOpen(false)} />
+
+      {/* Gemini AI Design Copilot Chat Drawer */}
+      <GeminiChatDrawer isOpen={isGeminiChatOpen} onClose={() => setGeminiChatOpen(false)} />
     </div>
   )
 }

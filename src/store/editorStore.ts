@@ -62,6 +62,7 @@ interface EditorState {
   setTransientState: (state: Partial<EditorState>) => void
 
   addNode: (node: DesignNode) => void
+  addNodes: (nodes: DesignNode[]) => void
   updateNode: (id: string, changes: Partial<DesignNode>) => void
   updateNodes: (ids: string[], changes: Partial<DesignNode>) => void
   deleteSelected: () => void
@@ -302,6 +303,40 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       document: updatedDoc,
       selectedNodeIds: [node.id],
+      canUndo: historyManager.canUndo(),
+      canRedo: historyManager.canRedo(),
+      saveStatus: 'unsaved',
+    })
+    get().saveDocumentNow()
+  },
+
+  addNodes: (newNodes: DesignNode[]) => {
+    const { document, activePageId } = get()
+    if (!document || newNodes.length === 0) return
+
+    const page = document.pages.find((p) => p.id === activePageId) || document.pages[0]
+    if (!page) return
+
+    const updatedPages = document.pages.map((p) => {
+      if (p.id === page.id) {
+        return {
+          ...p,
+          nodes: [...p.nodes, ...newNodes],
+        }
+      }
+      return p
+    })
+
+    const updatedDoc: DocumentModel = {
+      ...document,
+      pages: updatedPages,
+      updatedAt: Date.now(),
+    }
+
+    historyManager.push(updatedDoc, `AI Generated ${newNodes[0]?.name || 'Components'}`)
+    set({
+      document: updatedDoc,
+      selectedNodeIds: newNodes.map((n) => n.id),
       canUndo: historyManager.canUndo(),
       canRedo: historyManager.canRedo(),
       saveStatus: 'unsaved',
