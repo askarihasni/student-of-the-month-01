@@ -17,3 +17,4 @@ export const generateDesignSchema = z.object({
 });
 
 export type GenerateDesignInput = z.infer<typeof generateDesignSchema>;
+

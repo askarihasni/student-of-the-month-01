@@ -510,3 +510,4 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
     </div>
   )
 }
+

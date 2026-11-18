@@ -12,6 +12,12 @@ export default defineConfig({
         target: 'http://127.0.0.1:5000',
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            const code = (err as any)?.code
+            if (code === 'ECONNABORTED' || code === 'ECONNRESET' || code === 'EPIPE') return
+          })
+        },
       },
       '/uploads': {
         target: 'http://127.0.0.1:5000',
@@ -23,6 +29,12 @@ export default defineConfig({
         ws: true,
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            const code = (err as any)?.code
+            if (code === 'ECONNABORTED' || code === 'ECONNRESET' || code === 'EPIPE') return
+          })
+        },
       },
     },
   },

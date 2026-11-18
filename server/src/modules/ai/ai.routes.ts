@@ -12,3 +12,4 @@ aiRouter.post(
 );
 
 aiRouter.get('/status', (req, res) => aiController.status(req, res));
+
