@@ -12,4 +12,5 @@ aiRouter.post(
 );
 
 aiRouter.get('/status', (req, res) => aiController.status(req, res));
+aiRouter.post('/set-key', (req, res) => aiController.setKey(req, res));
 

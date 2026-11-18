@@ -80,8 +80,18 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
     setApiKey(trimmed)
     if (trimmed) {
       localStorage.setItem('vectorly_gemini_api_key', trimmed)
+      fetch('/api/ai/set-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: trimmed }),
+      }).catch(() => {})
     } else {
       localStorage.removeItem('vectorly_gemini_api_key')
+      fetch('/api/ai/set-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: '' }),
+      }).catch(() => {})
     }
     setShowKeyModal(false)
   }
@@ -119,6 +129,31 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
     }
 
     setMessages((prev) => [...prev, userMsg])
+
+    // Check if user pasted a Gemini API key into the prompt
+    const aiKeyMatch = finalPrompt.match(/AIzaSy[a-zA-Z0-9_\-]{30,}/)
+    if (aiKeyMatch) {
+      const extractedKey = aiKeyMatch[0]
+      setApiKey(extractedKey)
+      localStorage.setItem('vectorly_gemini_api_key', extractedKey)
+      fetch('/api/ai/set-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: extractedKey }),
+      }).catch(() => {})
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai_${Date.now()}`,
+          role: 'assistant',
+          text: `🎉 **Google Gemini API Key successfully connected!**\n\nAb Real Gemini AI (gemini-2.5-flash / gemini-1.5-flash) canvas ke sath link ho chuka hai. Ab aap koi bhi custom design prompt bolein (jaise "Create an e-commerce shopping card with price, tags and buy button"), Real Gemini direct canvas par custom elements generate karega!`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ])
+      return
+    }
+
     setIsGenerating(true)
 
     // Calculate smart coordinate offset on the active canvas
@@ -274,6 +309,43 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
 
       {/* 2. Messages List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs font-sans">
+        {!apiKey && (
+          <div className="bg-gradient-to-r from-purple-950/70 via-indigo-950/60 to-purple-950/70 border border-purple-500/30 rounded-xl p-3 text-xs space-y-2 shadow-inner">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-semibold text-purple-200">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span>Real Google Gemini AI Mode</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setKeyInput(apiKey)
+                  setShowKeyModal(true)
+                }}
+                className="px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-semibold transition-all shadow-sm flex items-center gap-1"
+              >
+                <Key className="w-2.5 h-2.5" />
+                <span>Set API Key</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-purple-200/80 leading-relaxed">
+              Real Gemini AI se live dynamic designs banane ke liye apni Google Gemini API Key add karein (Google AI Studio se 1-click me free mil jati hai).
+            </p>
+            <div className="flex items-center justify-between text-[10px] text-purple-300 pt-1 border-t border-purple-500/20">
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:underline flex items-center gap-1 text-purple-300 font-medium"
+              >
+                <span>Get Free Key (Google AI Studio)</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+              <span className="text-[#A1A1AA]">Ya chat me paste karein</span>
+            </div>
+          </div>
+        )}
+
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -481,11 +553,21 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
             </div>
 
             <p className="text-xs text-[#A1A1AA] leading-relaxed">
-              Enter your Google Gemini API key to enable direct live AI model inference. If empty, the built-in Intelligent Vector Design Agent will be used automatically.
+              Google Gemini API key add karein to unlock real-time live AI generation (Gemini 2.5 Flash / 1.5 Flash). Aap bilkul free key hasil kar sakte hain:
             </p>
 
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 underline font-medium"
+            >
+              <span>Get Free Gemini Key from Google AI Studio</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+
             <div className="space-y-1.5">
-              <label className="text-[10px] text-[#71717A] uppercase font-semibold">Google AI Key</label>
+              <label className="text-[10px] text-[#71717A] uppercase font-semibold">Google Gemini API Key</label>
               <input
                 type="password"
                 value={keyInput}
