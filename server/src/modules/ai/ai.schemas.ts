@@ -1,20 +1,25 @@
 import { z } from 'zod';
 
 export const generateDesignSchema = z.object({
-  prompt: z.string().min(2, 'Prompt must be at least 2 characters long').max(1000, 'Prompt is too long'),
-  targetPosition: z.object({
-    x: z.number().default(100),
-    y: z.number().default(100),
-  }).optional(),
-  documentId: z.string().optional(),
-  pageId: z.string().optional(),
-  existingBounds: z.object({
-    minX: z.number(),
-    minY: z.number(),
-    maxX: z.number(),
-    maxY: z.number(),
-  }).optional(),
+  prompt: z.string().trim().min(1, 'Prompt cannot be empty').max(2000, 'Prompt is too long'),
+  targetPosition: z
+    .object({
+      x: z.number().optional().nullable(),
+      y: z.number().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
+  documentId: z.string().optional().nullable(),
+  pageId: z.string().optional().nullable(),
+  existingBounds: z
+    .object({
+      minX: z.number().optional(),
+      minY: z.number().optional(),
+      maxX: z.number().optional(),
+      maxY: z.number().optional(),
+    })
+    .optional()
+    .nullable(),
 });
 
 export type GenerateDesignInput = z.infer<typeof generateDesignSchema>;
-

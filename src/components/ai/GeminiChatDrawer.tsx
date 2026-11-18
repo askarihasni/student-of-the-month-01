@@ -135,10 +135,22 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
     let targetY = 120
 
     if (pageNodes.length > 0) {
-      const aabb = NodeUtils.getNodesAABB(pageNodes)
-      targetX = Math.round(aabb.x + aabb.width + 80)
-      targetY = Math.round(aabb.y)
+      try {
+        const aabb = NodeUtils.getNodesAABB(pageNodes)
+        if (Number.isFinite(aabb.x) && Number.isFinite(aabb.width)) {
+          targetX = Math.round(aabb.x + aabb.width + 60)
+        }
+        if (Number.isFinite(aabb.y)) {
+          targetY = Math.round(aabb.y)
+        }
+      } catch {
+        targetX = 120
+        targetY = 120
+      }
     }
+
+    const safeX = Number.isFinite(targetX) ? targetX : 120
+    const safeY = Number.isFinite(targetY) ? targetY : 120
 
     try {
       const headers: Record<string, string> = {
@@ -153,7 +165,7 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
         headers,
         body: JSON.stringify({
           prompt: finalPrompt,
-          targetPosition: { x: targetX, y: targetY },
+          targetPosition: { x: safeX, y: safeY },
           documentId: document?.id,
           pageId: activePage?.id,
         }),

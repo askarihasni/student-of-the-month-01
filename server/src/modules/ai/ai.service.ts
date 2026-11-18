@@ -13,8 +13,26 @@ export class AiService {
     customApiKey?: string
   ): Promise<GeneratedDesignResult> {
     const apiKey = customApiKey || process.env.GEMINI_API_KEY;
-    const baseX = targetPosition?.x ?? 120;
-    const baseY = targetPosition?.y ?? 120;
+    const baseX = typeof targetPosition?.x === 'number' && Number.isFinite(targetPosition.x) ? targetPosition.x : 120;
+    const baseY = typeof targetPosition?.y === 'number' && Number.isFinite(targetPosition.y) ? targetPosition.y : 120;
+
+    const sanitizeResult = (res: GeneratedDesignResult): GeneratedDesignResult => {
+      const sanitizedNodes = (res.nodes || []).map((n) => ({
+        ...n,
+        visible: n.visible ?? true,
+        locked: n.locked ?? false,
+        opacity: typeof n.opacity === 'number' && Number.isFinite(n.opacity) ? n.opacity : 1,
+        rotation: typeof n.rotation === 'number' && Number.isFinite(n.rotation) ? n.rotation : 0,
+        x: typeof n.x === 'number' && Number.isFinite(n.x) ? n.x : baseX,
+        y: typeof n.y === 'number' && Number.isFinite(n.y) ? n.y : baseY,
+        width: typeof n.width === 'number' && Number.isFinite(n.width) && n.width > 0 ? n.width : 100,
+        height: typeof n.height === 'number' && Number.isFinite(n.height) && n.height > 0 ? n.height : 100,
+      }));
+      return {
+        ...res,
+        nodes: sanitizedNodes,
+      };
+    };
 
     if (apiKey && apiKey.trim().length > 5) {
       try {
@@ -22,7 +40,7 @@ export class AiService {
         const result = await this.callGemini(apiKey.trim(), prompt, baseX, baseY);
         if (result && result.nodes && result.nodes.length > 0) {
           logger.info({ count: result.nodes.length }, 'Gemini successfully generated design nodes');
-          return result;
+          return sanitizeResult(result);
         }
       } catch (error) {
         logger.warn(
@@ -34,7 +52,7 @@ export class AiService {
 
     // High quality procedural generator fallback
     logger.info({ prompt }, 'Using high-fidelity procedural design generator');
-    return generateTemplateDesign(prompt, baseX, baseY);
+    return sanitizeResult(generateTemplateDesign(prompt, baseX, baseY));
   }
 
   private async callGemini(

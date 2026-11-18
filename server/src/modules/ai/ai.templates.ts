@@ -6,6 +6,10 @@ export interface DesignNodeData {
   y: number;
   width: number;
   height: number;
+  visible?: boolean;
+  locked?: boolean;
+  opacity?: number;
+  rotation?: number;
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
@@ -18,8 +22,6 @@ export interface DesignNodeData {
   fontFamily?: string;
   fontWeight?: string;
   textAlign?: 'left' | 'center' | 'right';
-  opacity?: number;
-  rotation?: number;
 }
 
 export interface GeneratedDesignResult {
@@ -39,6 +41,260 @@ export function generateTemplateDesign(
   baseY: number = 100
 ): GeneratedDesignResult {
   const p = prompt.toLowerCase();
+
+  // 0A. COLOR SELECTOR SWATCHES
+  if (p.includes('color') || p.includes('swatch') || p.includes('selector')) {
+    const frameId = genId('frame_swatches');
+    const titleId = genId('text_title');
+    const subId = genId('text_sub');
+    const sw1 = genId('ellipse_sw1');
+    const sw2 = genId('ellipse_sw2');
+    const sw3 = genId('ellipse_sw3');
+    const sw4 = genId('ellipse_sw4');
+    const sw5 = genId('ellipse_sw5');
+    const ringId = genId('ellipse_ring');
+    const labelId = genId('text_lbl');
+
+    const nodes: DesignNodeData[] = [
+      {
+        id: frameId,
+        type: 'frame',
+        name: 'Color Selector Swatches',
+        x: baseX,
+        y: baseY,
+        width: 320,
+        height: 140,
+        fill: '#1E1E1E',
+        stroke: '#383838',
+        strokeWidth: 1,
+        cornerRadius: 16,
+        clipContent: true,
+        childrenIds: [titleId, subId, ringId, sw1, sw2, sw3, sw4, sw5, labelId],
+      },
+      {
+        id: titleId,
+        type: 'text',
+        name: 'Section Title',
+        x: baseX + 20,
+        y: baseY + 18,
+        width: 200,
+        height: 18,
+        text: 'AVAILABLE COLORS',
+        fontSize: 10,
+        fontFamily: 'Inter, sans-serif',
+        fontWeight: 'bold',
+        fill: '#94A3B8',
+        parentId: frameId,
+      },
+      {
+        id: subId,
+        type: 'text',
+        name: 'Selected Name',
+        x: baseX + 190,
+        y: baseY + 18,
+        width: 110,
+        height: 18,
+        text: 'Figma Blue',
+        fontSize: 10,
+        fontFamily: 'Inter, sans-serif',
+        fontWeight: 'bold',
+        textAlign: 'right',
+        fill: '#0D99FF',
+        parentId: frameId,
+      },
+      {
+        id: ringId,
+        type: 'ellipse',
+        name: 'Active Ring',
+        x: baseX + 72,
+        y: baseY + 48,
+        width: 36,
+        height: 36,
+        fill: 'transparent',
+        stroke: '#0D99FF',
+        strokeWidth: 2,
+        parentId: frameId,
+      },
+      {
+        id: sw1,
+        type: 'ellipse',
+        name: 'Color: Midnight',
+        x: baseX + 24,
+        y: baseY + 52,
+        width: 28,
+        height: 28,
+        fill: '#0F172A',
+        stroke: '#475569',
+        strokeWidth: 1,
+        parentId: frameId,
+      },
+      {
+        id: sw2,
+        type: 'ellipse',
+        name: 'Color: Figma Blue',
+        x: baseX + 76,
+        y: baseY + 52,
+        width: 28,
+        height: 28,
+        fill: '#0D99FF',
+        parentId: frameId,
+      },
+      {
+        id: sw3,
+        type: 'ellipse',
+        name: 'Color: Emerald',
+        x: baseX + 128,
+        y: baseY + 52,
+        width: 28,
+        height: 28,
+        fill: '#10B981',
+        parentId: frameId,
+      },
+      {
+        id: sw4,
+        type: 'ellipse',
+        name: 'Color: Amber',
+        x: baseX + 180,
+        y: baseY + 52,
+        width: 28,
+        height: 28,
+        fill: '#F59E0B',
+        parentId: frameId,
+      },
+      {
+        id: sw5,
+        type: 'ellipse',
+        name: 'Color: Coral',
+        x: baseX + 232,
+        y: baseY + 52,
+        width: 28,
+        height: 28,
+        fill: '#EF4444',
+        parentId: frameId,
+      },
+      {
+        id: labelId,
+        type: 'text',
+        name: 'Hint Text',
+        x: baseX + 20,
+        y: baseY + 102,
+        width: 280,
+        height: 18,
+        text: '5 color options in stock with fast delivery',
+        fontSize: 11,
+        fontFamily: 'Inter, sans-serif',
+        fontWeight: 'normal',
+        fill: '#64748B',
+        parentId: frameId,
+      },
+    ];
+
+    return {
+      title: 'Color Selector Swatches',
+      explanation: 'Interactive color picker row with 5 stylish circular color swatches, active selection ring, and product availability label.',
+      suggestedPrompts: [
+        'Add a Size selector (S, M, L, XL) underneath',
+        'Add Quantity counter stepper',
+      ],
+      nodes,
+    };
+  }
+
+  // 0B. WISHLIST / HEART ICON
+  if (p.includes('wishlist') || p.includes('heart') || p.includes('favorite') || p.includes('like')) {
+    const frameId = genId('frame_wishlist');
+    const heartCircle = genId('ellipse_heart');
+    const heartIcon = genId('text_heart');
+    const titleId = genId('text_title');
+    const descId = genId('text_desc');
+
+    const nodes: DesignNodeData[] = [
+      {
+        id: frameId,
+        type: 'frame',
+        name: 'Wishlist Action Card',
+        x: baseX,
+        y: baseY,
+        width: 260,
+        height: 110,
+        fill: '#1E1E1E',
+        stroke: '#383838',
+        strokeWidth: 1,
+        cornerRadius: 16,
+        clipContent: true,
+        childrenIds: [heartCircle, heartIcon, titleId, descId],
+      },
+      {
+        id: heartCircle,
+        type: 'ellipse',
+        name: 'Heart Circle Button',
+        x: baseX + 20,
+        y: baseY + 28,
+        width: 48,
+        height: 48,
+        fill: '#451A24',
+        stroke: '#F43F5E',
+        strokeWidth: 1.5,
+        parentId: frameId,
+      },
+      {
+        id: heartIcon,
+        type: 'text',
+        name: 'Heart Symbol',
+        x: baseX + 20,
+        y: baseY + 36,
+        width: 48,
+        height: 32,
+        text: '♥',
+        fontSize: 24,
+        fontFamily: 'Inter, sans-serif',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        fill: '#F43F5E',
+        parentId: frameId,
+      },
+      {
+        id: titleId,
+        type: 'text',
+        name: 'Action Title',
+        x: baseX + 80,
+        y: baseY + 30,
+        width: 160,
+        height: 22,
+        text: 'Saved to Wishlist',
+        fontSize: 14,
+        fontFamily: 'Inter, sans-serif',
+        fontWeight: 'bold',
+        fill: '#FFFFFF',
+        parentId: frameId,
+      },
+      {
+        id: descId,
+        type: 'text',
+        name: 'Save Count',
+        x: baseX + 80,
+        y: baseY + 54,
+        width: 160,
+        height: 18,
+        text: '342 people saved this item',
+        fontSize: 11,
+        fontFamily: 'Inter, sans-serif',
+        fontWeight: 'normal',
+        fill: '#94A3B8',
+        parentId: frameId,
+      },
+    ];
+
+    return {
+      title: 'Wishlist Heart Badge',
+      explanation: 'Sleek favorite/wishlist component with crimson heart icon circle, confirmation title, and social proof counter.',
+      suggestedPrompts: [
+        'Add Share button next to Wishlist',
+        'Turn into an interactive product floating action bar',
+      ],
+      nodes,
+    };
+  }
 
   // 1. LOGIN / SIGN IN / AUTH SCREEN
   if (p.includes('login') || p.includes('sign in') || p.includes('signin') || p.includes('auth')) {
