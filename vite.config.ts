@@ -15,7 +15,7 @@ export default defineConfig({
         configure: (proxy) => {
           proxy.on('error', (err) => {
             const code = (err as any)?.code
-            if (code === 'ECONNABORTED' || code === 'ECONNRESET' || code === 'EPIPE') return
+            if (code === 'ECONNABORTED' || code === 'ECONNRESET' || code === 'EPIPE' || code === 'ECONNREFUSED') return
           })
         },
       },
@@ -32,7 +32,10 @@ export default defineConfig({
         configure: (proxy) => {
           proxy.on('error', (err) => {
             const code = (err as any)?.code
-            if (code === 'ECONNABORTED' || code === 'ECONNRESET' || code === 'EPIPE') return
+            if (code === 'ECONNABORTED' || code === 'ECONNRESET' || code === 'EPIPE' || code === 'ECONNREFUSED') return
+          })
+          proxy.on('proxyReqWs', (_proxyReq, _req, socket) => {
+            socket.on('error', () => {})
           })
         },
       },
