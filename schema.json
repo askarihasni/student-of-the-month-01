@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClaudeEnterpriseSecurityAuditOutput",
+  "description": "Strict validation schema for enterprise code refactoring and security audit agent responses.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "thinking_trace",
+    "audit_summary",
+    "risk_score",
+    "vulnerabilities",
+    "performance_bottlenecks",
+    "refactored_code",
+    "unresolved_ambiguities"
+  ],
+  "properties": {
+    "thinking_trace": {
+      "type": "object",
+      "description": "Chain-of-thought analysis trace providing verifiable reasoning before conclusions are formed.",
+      "required": [
+        "code_walkthrough",
+        "threat_modeling_and_injections",
+        "boundary_conditions_analyzed",
+        "complexity_profiling",
+        "remediation_strategy"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code_walkthrough": {
+          "type": "array",
+          "description": "Step-by-step mechanical analysis of the source code lines.",
+          "items": {
+            "type": "object",
+            "required": ["step", "line_range", "focus", "analysis"],
+            "additionalProperties": false,
+            "properties": {
+              "step": { "type": "integer", "minimum": 1 },
+              "line_range": { "type": "string" },
+              "focus": { "type": "string" },
+              "analysis": { "type": "string" }
+            }
+          }
+        },
+        "threat_modeling_and_injections": {
+          "type": "array",
+          "description": "Evaluation of active threats, untrusted inputs, and prompt injection attacks in comments or literals.",
+          "items": { "type": "string" }
+        },
+        "boundary_conditions_analyzed": {
+          "type": "array",
+          "description": "Edge case boundary analyses such as null/undefined, concurrency, timeouts, and overflow.",
+          "items": { "type": "string" }
+        },
+        "complexity_profiling": {
+          "type": "object",
+          "required": ["time_complexity_assessment", "space_complexity_assessment"],
+          "additionalProperties": false,
+          "properties": {
+            "time_complexity_assessment": { "type": "string" },
+            "space_complexity_assessment": { "type": "string" }
+          }
+        },
+        "remediation_strategy": {
+          "type": "string",
+          "description": "Architectural strategy guiding the refactored code construction."
+        }
+      }
+    },
+    "audit_summary": {
+      "type": "object",
+      "description": "Executive synopsis and metadata of the scan.",
+      "required": [
+        "agent_name",
+        "timestamp",
+        "scanned_language",
+        "lines_scanned",
+        "overall_verdict",
+        "executive_summary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "agent_name": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "scanned_language": { "type": "string" },
+        "lines_scanned": { "type": "integer", "minimum": 0 },
+        "overall_verdict": {
+          "type": "string",
+          "enum": ["CRITICAL_RISK", "NEEDS_REFACTORING", "SECURE"]
+        },
+        "executive_summary": { "type": "string" }
+      }
+    },
+    "risk_score": {
+      "type": "object",
+      "description": "Deterministic calibrated risk rating and mathematical rationale.",
+      "required": ["score", "severity_level", "score_justification"],
+      "additionalProperties": false,
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 10.0
+        },
+        "severity_level": {
+          "type": "string",
+          "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFORMATIONAL"]
+        },
+        "score_justification": { "type": "string" }
+      }
+    },
+    "vulnerabilities": {
+      "type": "array",
+      "description": "List of discovered security flaws and active adversarial injections.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "cwe_id",
+          "owasp_category",
+          "severity",
+          "cvss_v3_score",
+          "line_numbers",
+          "vulnerable_snippet",
+          "attack_vector",
+          "impact",
+          "remediation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^VULN-[0-9]{3,}$" },
+          "title": { "type": "string" },
+          "cwe_id": { "type": "string", "pattern": "^CWE-[0-9]+$" },
+          "owasp_category": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFORMATIONAL"]
+          },
+          "cvss_v3_score": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 10.0
+          },
+          "line_numbers": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          },
+          "vulnerable_snippet": { "type": "string" },
+          "attack_vector": { "type": "string" },
+          "impact": { "type": "string" },
+          "remediation": { "type": "string" }
+        }
+      }
+    },
+    "performance_bottlenecks": {
+      "type": "array",
+      "description": "List of detected algorithmic and architectural bottlenecks.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "description",
+          "line_numbers",
+          "time_complexity_before",
+          "time_complexity_after",
+          "space_complexity_before",
+          "space_complexity_after",
+          "optimization_strategy"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^PERF-[0-9]{3,}$" },
+          "type": { "type": "string" },
+          "description": { "type": "string" },
+          "line_numbers": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          },
+          "time_complexity_before": { "type": "string" },
+          "time_complexity_after": { "type": "string" },
+          "space_complexity_before": { "type": "string" },
+          "space_complexity_after": { "type": "string" },
+          "optimization_strategy": { "type": "string" }
+        }
+      }
+    },
+    "refactored_code": {
+      "type": "object",
+      "description": "Hardened, production-grade refactored code and changes.",
+      "required": [
+        "code",
+        "language",
+        "changelog",
+        "verification_test_suggestions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "code": { "type": "string" },
+        "language": { "type": "string" },
+        "changelog": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "verification_test_suggestions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "unresolved_ambiguities": {
+      "type": "array",
+      "description": "Clarifying questions and ambiguities to prevent hallucinations.",
+      "items": {
+        "type": "object",
+        "required": [
+          "category",
+          "description",
+          "clarifying_query",
+          "affected_lines"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "SYNTAX_CORRUPTION",
+              "MISSING_DEPENDENCY",
+              "UNDEFINED_BEHAVIOR",
+              "CONTEXT_GAP"
+            ]
+          },
+          "description": { "type": "string" },
+          "clarifying_query": { "type": "string" },
+          "affected_lines": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    }
+  }
+}
+

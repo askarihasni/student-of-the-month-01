@@ -17,6 +17,63 @@ import {
 import { useEditorStore } from '../../store/editorStore'
 import { NodeUtils } from '../../editor/model/nodeUtils'
 import type { DesignNode } from '../../types/document'
+import { generateClientTemplateDesign, type GeneratedDesignResult } from './clientAiTemplates'
+
+async function callDirectGemini(
+  apiKey: string,
+  userPrompt: string,
+  baseX: number,
+  baseY: number
+): Promise<GeneratedDesignResult | null> {
+  const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash']
+  const systemInstruction = `You are a world-class Senior UI/UX Designer and Vector Graphics Engine Specialist in VECTORLY.
+Your job is to read user design prompts and generate pixel-perfect, modern, production-grade vector UI components.
+1. Every component MUST have a container FrameNode (type: 'frame') enclosing child elements.
+2. Coordinates must start at (baseX: ${baseX}, baseY: ${baseY}).
+3. Supported types: 'frame', 'rectangle', 'text', 'ellipse'.
+4. Return ONLY valid JSON: { "title": "...", "explanation": "...", "suggestedPrompts": [...], "nodes": [...] }`
+
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.3,
+          },
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        let text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+        if (text) {
+          if (text.startsWith('```json')) text = text.slice(7)
+          if (text.startsWith('```')) text = text.slice(3)
+          if (text.endsWith('```')) text = text.slice(0, -3)
+          text = text.trim()
+          const firstBrace = text.indexOf('{')
+          const lastBrace = text.lastIndexOf('}')
+          if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            text = text.substring(firstBrace, lastBrace + 1)
+          }
+          const parsed = JSON.parse(text)
+          if (Array.isArray(parsed.nodes) && parsed.nodes.length > 0) {
+            return parsed
+          }
+        }
+      }
+    } catch {
+      // try next model
+    }
+  }
+  return null
+}
 
 interface ChatMessage {
   id: string
@@ -187,6 +244,8 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
     const safeX = Number.isFinite(targetX) ? targetX : 120
     const safeY = Number.isFinite(targetY) ? targetY : 120
 
+    let generatedResult: GeneratedDesignResult | null = null
+
     try {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -195,36 +254,65 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
         headers['x-gemini-api-key'] = apiKey
       }
 
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          prompt: finalPrompt,
-          targetPosition: { x: safeX, y: safeY },
-          documentId: document?.id,
-          pageId: activePage?.id,
-        }),
-      })
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 6000)
 
-      const json = await response.json()
+      try {
+        const response = await fetch('/api/ai/generate', {
+          method: 'POST',
+          headers,
+          signal: controller.signal,
+          body: JSON.stringify({
+            prompt: finalPrompt,
+            targetPosition: { x: safeX, y: safeY },
+            documentId: document?.id,
+            pageId: activePage?.id,
+          }),
+        })
+        clearTimeout(timeoutId)
 
-      if (json.success && json.data) {
-        const generatedNodes = (json.data.nodes || []) as DesignNode[]
+        if (response.ok) {
+          const rawText = await response.text()
+          if (rawText && rawText.trim().length > 0) {
+            const json = JSON.parse(rawText)
+            if (json.success && json.data && Array.isArray(json.data.nodes) && json.data.nodes.length > 0) {
+              generatedResult = json.data
+            }
+          }
+        }
+      } catch (backendFetchErr) {
+        console.warn('Backend /api/ai/generate request failed, switching to client generation', backendFetchErr)
+      }
+
+      // If backend was offline or failed and user configured an API Key, call Gemini directly from browser
+      if (!generatedResult && apiKey) {
+        try {
+          generatedResult = await callDirectGemini(apiKey, finalPrompt, safeX, safeY)
+        } catch (directErr) {
+          console.warn('Direct Gemini API call failed', directErr)
+        }
+      }
+
+      // If still null, generate high-fidelity client template component
+      if (!generatedResult) {
+        generatedResult = generateClientTemplateDesign(finalPrompt, safeX, safeY)
+      }
+
+      if (generatedResult && Array.isArray(generatedResult.nodes) && generatedResult.nodes.length > 0) {
+        const generatedNodes = generatedResult.nodes as DesignNode[]
 
         // Add nodes to canvas
-        if (generatedNodes.length > 0) {
-          addNodes(generatedNodes)
-          focusOnNodes(generatedNodes)
-        }
+        addNodes(generatedNodes)
+        focusOnNodes(generatedNodes)
 
         const aiMsg: ChatMessage = {
           id: `ai_${Date.now()}`,
           role: 'assistant',
-          text: json.data.explanation || `I have generated ${generatedNodes.length} vector elements for "${finalPrompt}".`,
+          text: generatedResult.explanation || `I have generated ${generatedNodes.length} vector elements for "${finalPrompt}".`,
           data: {
-            title: json.data.title || 'Generated Component',
-            explanation: json.data.explanation,
-            suggestedPrompts: json.data.suggestedPrompts,
+            title: generatedResult.title || 'Generated Component',
+            explanation: generatedResult.explanation,
+            suggestedPrompts: generatedResult.suggestedPrompts,
             nodes: generatedNodes,
           },
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -232,16 +320,30 @@ export const GeminiChatDrawer: React.FC<GeminiChatDrawerProps> = ({ isOpen, onCl
 
         setMessages((prev) => [...prev, aiMsg])
       } else {
-        throw new Error(json.error?.message || 'Failed to generate design')
+        throw new Error('Could not synthesize design elements.')
       }
     } catch (err) {
-      const errorMsg: ChatMessage = {
-        id: `err_${Date.now()}`,
-        role: 'assistant',
-        text: `Error generating design: ${(err as Error).message}. Please try again or check your API key.`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      const fallback = generateClientTemplateDesign(finalPrompt, safeX, safeY)
+      if (fallback && fallback.nodes.length > 0) {
+        addNodes(fallback.nodes)
+        focusOnNodes(fallback.nodes)
+        const aiMsg: ChatMessage = {
+          id: `ai_${Date.now()}`,
+          role: 'assistant',
+          text: fallback.explanation,
+          data: fallback,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }
+        setMessages((prev) => [...prev, aiMsg])
+      } else {
+        const errorMsg: ChatMessage = {
+          id: `err_${Date.now()}`,
+          role: 'assistant',
+          text: `Error generating design: ${(err as Error).message}.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }
+        setMessages((prev) => [...prev, errorMsg])
       }
-      setMessages((prev) => [...prev, errorMsg])
     } finally {
       setIsGenerating(false)
     }
