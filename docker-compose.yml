@@ -43,7 +43,17 @@ services:
     volumes:
       - uploads_data:/app/uploads
 
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vectorly_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '5173:80'
+
 volumes:
   pgdata:
   uploads_data:
-
